@@ -71,7 +71,7 @@ export default function ExcelUpload({ onSuccess }: ExcelUploadProps) {
     }
   }, [cases]);
 
-  const handleConfirmImport = useCallback(async (selectedCases: RejectionCase[]) => {
+  const handleConfirmImport = useCallback(async (selectedCases: RejectionCase[], duplicateMode: 'append' | 'overwrite') => {
     setIsImporting(true);
     setUploadStatus(null);
 
@@ -82,7 +82,8 @@ export default function ExcelUpload({ onSuccess }: ExcelUploadProps) {
 
       for (const caseItem of selectedCases) {
         try {
-          await addCase(caseItem);
+          // Pass duplicateMode to addCase
+          await addCase(caseItem, duplicateMode);
           successCount++;
         } catch (error) {
           errorCount++;

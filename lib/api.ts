@@ -101,11 +101,11 @@ export const casesApi = {
     return response.json();
   },
 
-  async create(data: CreateCaseInput): Promise<RejectionCase> {
+  async create(data: CreateCaseInput, duplicateMode: 'append' | 'overwrite' = 'append'): Promise<RejectionCase> {
     const response = await fetch(`${API_BASE_URL}/cases`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
+      body: JSON.stringify({ ...data, duplicateMode }),
     });
     if (!response.ok) {
       const error = await response.json();

@@ -14,7 +14,7 @@ interface CasesContextType {
   cases: RejectionCase[];
   setCases: (cases: RejectionCase[]) => void;
   refreshCases: () => Promise<void>;
-  addCase: (caseItem: any) => Promise<void>;
+  addCase: (caseItem: any, duplicateMode?: 'append' | 'overwrite') => Promise<void>;
   updateCase: (codigoSC: string, updates: Partial<RejectionCase>) => Promise<void>;
   deleteCase: (codigoSC: string) => Promise<void>;
   addTimelineEvent: (codigoSC: string, event: CreateEventInput) => Promise<void>;
@@ -53,10 +53,10 @@ export function CasesProvider({ children }: { children: ReactNode }) {
     setCasesState(newCases);
   };
 
-  const addCase = async (caseItem: any) => {
+  const addCase = async (caseItem: any, duplicateMode: 'append' | 'overwrite' = 'append') => {
     try {
       setError(null);
-      const newCase = await casesApi.create(caseItem);
+      const newCase = await casesApi.create(caseItem, duplicateMode);
       setCasesState(prev => {
         const exists = prev.some(c => c.codigoSC === newCase.codigoSC);
         if (exists) {
