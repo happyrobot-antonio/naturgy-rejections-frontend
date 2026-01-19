@@ -2,21 +2,12 @@
 
 import { useState } from 'react';
 import { Check, X, CheckSquare, Square, AlertTriangle } from 'lucide-react';
-
-interface ParsedCase {
-  codigoSC: string;
-  dniCif: string;
-  nombreApellidos: string;
-  cups: string;
-  proceso: string;
-  status: string;
-  [key: string]: any;
-}
+import { RejectionCase } from '@/types/case';
 
 interface ExcelPreviewProps {
-  cases: ParsedCase[];
+  cases: RejectionCase[];
   duplicateCodigoSCs: Set<string>;
-  onConfirm: (selectedCases: ParsedCase[]) => void;
+  onConfirm: (selectedCases: RejectionCase[]) => void;
   onCancel: () => void;
   isImporting: boolean;
 }
@@ -53,7 +44,7 @@ export default function ExcelPreview({ cases, duplicateCodigoSCs, onConfirm, onC
     onConfirm(selectedCases);
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: string): string => {
     switch (status) {
       case 'In progress':
         return 'bg-orange-100 text-orange-700';

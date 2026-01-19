@@ -63,7 +63,7 @@ export function parseCSV(file: File): Promise<ParseResult> {
 
 function mapRowToCase(row: Record<string, string>): RejectionCase {
   const mapped: any = {
-    timeline: [], // Initialize empty timeline
+    events: [], // Initialize empty events array
   };
 
   // Map CSV columns to RejectionCase properties
@@ -97,7 +97,7 @@ export function exportToCSV(cases: RejectionCase[]): string {
   const rows = cases.map((caseItem) => {
     const row: string[] = [];
     Object.entries(CSV_COLUMN_MAPPING).forEach(([csvColumn, propertyName]) => {
-      const value = caseItem[propertyName];
+      const value = (caseItem as any)[propertyName];
       row.push(value ? String(value) : '');
     });
     return row;

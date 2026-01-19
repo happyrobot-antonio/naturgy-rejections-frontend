@@ -1,4 +1,11 @@
-// Naturgy Rejection Case Types
+// Re-export types from API module for backwards compatibility
+export type {
+  RejectionCase,
+  TimelineEvent,
+  CreateCaseInput,
+  CreateEventInput,
+  CasesStats
+} from '@/lib/api';
 
 export type CaseStatus = 'In progress' | 'Revisar gestor' | 'Cancelar SC';
 
@@ -12,56 +19,8 @@ export type TimelineEventType =
   | 'email_received_with_attachment' 
   | 'email_received_no_attachment';
 
-export interface TimelineEvent {
-  id: string;
-  timestamp: Date;
-  type: TimelineEventType;
-  description: string;
-  metadata?: Record<string, any>;
-}
-
-export interface RejectionCase {
-  // Primary Key
-  codigoSC: string;
-  
-  // Client Information
-  dniCif: string;
-  nombreApellidos: string;
-  
-  // Contract Information
-  cups: string;
-  contratoNC: string;
-  lineaNegocio: string;
-  
-  // Address Information
-  direccionCompleta: string;
-  codigoPostal: string;
-  municipio: string;
-  provincia: string;
-  ccaa: string;
-  
-  // Distribution Information
-  distribuidora: string;
-  grupoDistribuidora: string;
-  
-  // Contact Information
-  emailContacto: string;
-  telefonoContacto: string;
-  
-  // Process Information
-  proceso: string;
-  potenciaActual: string;
-  potenciaSolicitada: string;
-  
-  // Status & Timeline
-  status: CaseStatus;
-  emailThreadId?: string;
-  fechaPrimerContacto: string;
-  timeline: TimelineEvent[];
-}
-
 // CSV column mapping for parsing
-export const CSV_COLUMN_MAPPING: Record<string, keyof RejectionCase> = {
+export const CSV_COLUMN_MAPPING: Record<string, string> = {
   'DNI/CIF': 'dniCif',
   'Nombre y apellidos': 'nombreApellidos',
   'CUPS': 'cups',

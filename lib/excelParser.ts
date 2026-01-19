@@ -100,7 +100,7 @@ export function parseExcel(file: File): Promise<ParseResult> {
 
 function mapRowToCase(row: Record<string, string>): RejectionCase {
   const mapped: any = {
-    timeline: [], // Initialize empty timeline
+    events: [], // Initialize empty events array
   };
 
   // Map Excel columns to RejectionCase properties
@@ -134,7 +134,7 @@ export function exportToExcel(cases: RejectionCase[]): Blob {
   const rows = cases.map((caseItem) => {
     const row: Record<string, any> = {};
     Object.entries(CSV_COLUMN_MAPPING).forEach(([excelColumn, propertyName]) => {
-      const value = caseItem[propertyName];
+      const value = (caseItem as any)[propertyName];
       row[excelColumn] = value || '';
     });
     return row;
