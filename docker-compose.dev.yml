@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  naturgy-frontend-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: naturgy-rejections-dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+    environment:
+      - NODE_ENV=development
+      # Future HappyRobot integration environment variables
+      # - HAPPYROBOT_WEBHOOK_URL=
+      # - HAPPYROBOT_X_API_KEY=
+      # - HAPPYROBOT_API_KEY=
+      # - HAPPYROBOT_ORG_ID=
+      # - HAPPYROBOT_ORG_SLUG=
+      # - HAPPYROBOT_WORKFLOW_ID=
+      # - APP_URL=
+    command: npm run dev
+    networks:
+      - naturgy-network
+
+networks:
+  naturgy-network:
+    driver: bridge
