@@ -27,7 +27,7 @@ export default function CaseDetail({ caseItem }: CaseDetailProps) {
   const [isAddingEvent, setIsAddingEvent] = useState(false);
 
   const handleAddEvent = async (
-    type: 'email_sent' | 'call_initiated' | 'email_received_with_attachment' | 'email_received_no_attachment',
+    type: 'email_not_found' | 'call_sent_to_get_email' | 'email_sent' | 'wait_24h' | 'wait_48h' | 'wait_72h' | 'email_received_with_attachment' | 'email_received_no_attachment',
     description: string
   ) => {
     try {
@@ -137,7 +137,7 @@ export default function CaseDetail({ caseItem }: CaseDetailProps) {
               </button>
               
               <button
-                onClick={() => handleAddEvent('call_initiated', 'Llamada realizada al cliente')}
+                onClick={() => handleAddEvent('call_sent_to_get_email', 'Llamada enviada para obtener email')}
                 disabled={isAddingEvent}
                 className="flex flex-col items-center justify-center space-y-2 px-4 py-3 bg-white border-2 border-naturgy-blue text-naturgy-blue rounded-lg hover:bg-naturgy-blue hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
