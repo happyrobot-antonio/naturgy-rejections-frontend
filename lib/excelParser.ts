@@ -113,6 +113,9 @@ function mapRowToCase(row: Record<string, string>): RejectionCase {
       // Set default empty values for required fields
       if (propertyName === 'status') {
         mapped[propertyName] = 'In progress';
+      } else if (propertyName === 'fechaPrimerContacto') {
+        // Use current date if fechaPrimerContacto is empty
+        mapped[propertyName] = new Date().toISOString();
       } else {
         mapped[propertyName] = '';
       }
@@ -123,6 +126,20 @@ function mapRowToCase(row: Record<string, string>): RejectionCase {
   const validStatuses = ['In progress', 'Revisar gestor', 'Cancelar SC'];
   if (mapped.status && !validStatuses.includes(mapped.status)) {
     mapped.status = 'In progress';
+  }
+
+  // Validate fechaPrimerContacto is a valid date
+  if (mapped.fechaPrimerContacto) {
+    const date = new Date(mapped.fechaPrimerContacto);
+    if (isNaN(date.getTime())) {
+      // If invalid date, use current date
+      mapped.fechaPrimerContacto = new Date().toISOString();
+    } else {
+      // Ensure it's in ISO format
+      mapped.fechaPrimerContacto = date.toISOString();
+    }
+  } else {
+    mapped.fechaPrimerContacto = new Date().toISOString();
   }
 
   return mapped as RejectionCase;
