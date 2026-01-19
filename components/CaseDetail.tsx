@@ -27,7 +27,7 @@ export default function CaseDetail({ caseItem }: CaseDetailProps) {
   const [isAddingEvent, setIsAddingEvent] = useState(false);
 
   const handleAddEvent = async (
-    type: 'email_not_found' | 'call_sent_to_get_email' | 'email_sent' | 'wait_24h' | 'wait_48h' | 'wait_72h' | 'email_received_with_attachment' | 'email_received_no_attachment',
+    type: 'happyrobot_init' | 'email_not_found' | 'call_sent_to_get_email' | 'email_sent' | 'wait_24h' | 'wait_48h' | 'wait_72h' | 'email_received_with_attachment' | 'email_received_no_attachment',
     description: string
   ) => {
     try {

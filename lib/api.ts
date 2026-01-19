@@ -33,7 +33,7 @@ export interface RejectionCase {
 export interface TimelineEvent {
   id: string;
   caseId: string;
-  type: 'email_not_found' | 'call_sent_to_get_email' | 'email_sent' | 'wait_24h' | 'wait_48h' | 'wait_72h' | 'email_received_with_attachment' | 'email_received_no_attachment';
+  type: 'happyrobot_init' | 'email_not_found' | 'call_sent_to_get_email' | 'email_sent' | 'wait_24h' | 'wait_48h' | 'wait_72h' | 'email_received_with_attachment' | 'email_received_no_attachment';
   description: string;
   metadata?: any;
   timestamp: string;
@@ -64,7 +64,7 @@ export interface CreateCaseInput {
 }
 
 export interface CreateEventInput {
-  type: 'email_not_found' | 'call_sent_to_get_email' | 'email_sent' | 'wait_24h' | 'wait_48h' | 'wait_72h' | 'email_received_with_attachment' | 'email_received_no_attachment';
+  type: 'happyrobot_init' | 'email_not_found' | 'call_sent_to_get_email' | 'email_sent' | 'wait_24h' | 'wait_48h' | 'wait_72h' | 'email_received_with_attachment' | 'email_received_no_attachment';
   description: string;
   metadata?: Record<string, any>;
 }
@@ -115,8 +115,8 @@ export const casesApi = {
   },
 
   async update(codigoSC: string, data: Partial<CreateCaseInput>): Promise<RejectionCase> {
-    const response = await fetch(`${API_BASE_URL}/cases/${codigoSC}`, {
-      method: 'PUT',
+    const response = await fetch(`${API_BASE_URL}/cases/${codigoSC}/update`, {
+      method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
     });
@@ -125,8 +125,8 @@ export const casesApi = {
   },
 
   async delete(codigoSC: string): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/cases/${codigoSC}`, {
-      method: 'DELETE',
+    const response = await fetch(`${API_BASE_URL}/cases/${codigoSC}/delete`, {
+      method: 'POST',
     });
     if (!response.ok) throw new Error('Failed to delete case');
   },
@@ -160,8 +160,8 @@ export const eventsApi = {
   },
 
   async delete(eventId: string): Promise<void> {
-    const response = await fetch(`${API_BASE_URL}/events/${eventId}`, {
-      method: 'DELETE',
+    const response = await fetch(`${API_BASE_URL}/events/${eventId}/delete`, {
+      method: 'POST',
     });
     if (!response.ok) throw new Error('Failed to delete event');
   },

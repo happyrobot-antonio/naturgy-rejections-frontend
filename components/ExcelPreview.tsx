@@ -13,19 +13,19 @@ interface ExcelPreviewProps {
 }
 
 export default function ExcelPreview({ cases, duplicateCodigoSCs, onConfirm, onCancel, isImporting }: ExcelPreviewProps) {
-  // Initialize selection excluding duplicates
+  // Initialize selection with ALL cases (including duplicates - they will append events)
   const [selectedIds, setSelectedIds] = useState<Set<string>>(
-    new Set(cases.filter(c => !duplicateCodigoSCs.has(c.codigoSC)).map(c => c.codigoSC))
+    new Set(cases.map(c => c.codigoSC))
   );
 
   const nonDuplicateCases = cases.filter(c => !duplicateCodigoSCs.has(c.codigoSC));
   const duplicateCases = cases.filter(c => duplicateCodigoSCs.has(c.codigoSC));
 
   const toggleAll = () => {
-    if (selectedIds.size === nonDuplicateCases.length) {
+    if (selectedIds.size === cases.length) {
       setSelectedIds(new Set());
     } else {
-      setSelectedIds(new Set(nonDuplicateCases.map(c => c.codigoSC)));
+      setSelectedIds(new Set(cases.map(c => c.codigoSC)));
     }
   };
 
@@ -76,9 +76,9 @@ export default function ExcelPreview({ cases, duplicateCodigoSCs, onConfirm, onC
             {duplicateCases.length > 0 && (
               <>
                 <span className="text-gray-400">•</span>
-                <p className="text-sm text-amber-600 flex items-center gap-1">
+                <p className="text-sm text-blue-600 flex items-center gap-1">
                   <AlertTriangle className="w-4 h-4" />
-                  {duplicateCases.length} duplicado{duplicateCases.length !== 1 ? 's' : ''}
+                  {duplicateCases.length} duplicado{duplicateCases.length !== 1 ? 's' : ''} (se agregarán eventos)
                 </p>
               </>
             )}
@@ -88,7 +88,7 @@ export default function ExcelPreview({ cases, duplicateCodigoSCs, onConfirm, onC
           onClick={toggleAll}
           className="flex items-center space-x-2 px-4 py-2 border-2 border-naturgy-blue text-naturgy-blue rounded-lg hover:bg-naturgy-blue hover:text-white transition-colors font-semibold"
         >
-          {selectedIds.size === nonDuplicateCases.length ? (
+          {selectedIds.size === cases.length ? (
             <>
               <CheckSquare className="w-5 h-5" />
               <span>Deseleccionar todos</span>
@@ -142,7 +142,9 @@ export default function ExcelPreview({ cases, duplicateCodigoSCs, onConfirm, onC
                   onClick={() => toggleCase(caseItem.codigoSC)}
                   className={`cursor-pointer transition-colors ${
                     isDuplicate 
-                      ? 'bg-amber-50 opacity-60'
+                      ? isSelected
+                        ? 'bg-blue-50'
+                        : 'bg-blue-50/50 hover:bg-blue-50'
                       : isSelected 
                         ? 'bg-orange-50' 
                         : 'hover:bg-gray-50'
@@ -154,8 +156,7 @@ export default function ExcelPreview({ cases, duplicateCodigoSCs, onConfirm, onC
                       checked={isSelected}
                       onChange={() => toggleCase(caseItem.codigoSC)}
                       onClick={(e) => e.stopPropagation()}
-                      disabled={isDuplicate}
-                      className="w-4 h-4 rounded border-gray-300 text-naturgy-orange focus:ring-naturgy-orange cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-4 h-4 rounded border-gray-300 text-naturgy-orange focus:ring-naturgy-orange cursor-pointer"
                     />
                   </td>
                   <td className="px-4 py-3">
@@ -164,9 +165,9 @@ export default function ExcelPreview({ cases, duplicateCodigoSCs, onConfirm, onC
                         {caseItem.codigoSC}
                       </span>
                       {isDuplicate && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium bg-amber-100 text-amber-800 border border-amber-300">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium bg-blue-100 text-blue-800 border border-blue-300">
                           <AlertTriangle className="w-3 h-3" />
-                          Ya existe
+                          Agregar eventos
                         </span>
                       )}
                     </div>

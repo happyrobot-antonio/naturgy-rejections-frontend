@@ -1,7 +1,7 @@
 'use client';
 
 import { TimelineEvent } from '@/types/case';
-import { Mail, Phone, Paperclip, FileText, AlertCircle, Clock } from 'lucide-react';
+import { Mail, Phone, Paperclip, FileText, AlertCircle, Clock, Zap } from 'lucide-react';
 
 interface TimelineProps {
   events: TimelineEvent[];
@@ -10,6 +10,8 @@ interface TimelineProps {
 
 const getEventIcon = (type: string) => {
   switch (type) {
+    case 'happyrobot_init':
+      return Zap;
     case 'email_not_found':
       return AlertCircle;
     case 'call_sent_to_get_email':
@@ -31,6 +33,8 @@ const getEventIcon = (type: string) => {
 
 const getEventColor = (type: string) => {
   switch (type) {
+    case 'happyrobot_init':
+      return 'bg-[#e57200]/10 text-[#e57200] border-[#e57200]/30';
     case 'email_not_found':
       return 'bg-red-50 text-red-600 border-red-200';
     case 'call_sent_to_get_email':
@@ -54,6 +58,8 @@ const getEventColor = (type: string) => {
 
 const getEventLabel = (type: string) => {
   switch (type) {
+    case 'happyrobot_init':
+      return 'Automatización Iniciada';
     case 'email_not_found':
       return 'Email No Encontrado';
     case 'call_sent_to_get_email':

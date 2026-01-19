@@ -10,6 +10,7 @@ export type {
 export type CaseStatus = 'In progress' | 'Revisar gestor' | 'Cancelar SC';
 
 export type TimelineEventType = 
+  | 'happyrobot_init'
   | 'email_not_found'
   | 'call_sent_to_get_email'
   | 'email_sent'
