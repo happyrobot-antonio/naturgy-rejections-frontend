@@ -39,41 +39,36 @@ HappyRobot is an AI voice agent platform. You define **workflows** in their dash
 ---
 
 ## Recommended Stack
-If non technical, use **Lovable**. If technical and thinking of extending later on,  **Railway** with the following stack:
+If non technical, use **Lovable**. If technical and thinking of extending later on, use **Docker** with the following stack:
 
 | Component | Recommendation | Why |
 |-----------|----------------|-----|
-| **Hosting** | [Railway](https://railway.app) | One-click deploy, auto-scaling, easy env management |
+| **Containerization** | [Docker](https://www.docker.com) | Consistent environments, easy deployment, scalability |
 | **Framework** | [Next.js](https://nextjs.org) | Frontend + `/api` routes = minimal backend for most apps |
-| **Database** | PostgreSQL (on Railway) | Native Railway integration, reliable, scalable |
-| **Real-time** | Redis SSE (on Railway) | Server-Sent Events via Redis pub/sub for live updates |
+| **Database** | PostgreSQL (containerized) | Reliable, scalable, well-supported |
+| **Real-time** | Redis SSE (containerized) | Server-Sent Events via Redis pub/sub for live updates |
 
 ### Why This Stack?
 
-1. **Simplicity**: Next.js `/api` routes eliminate the need for a separate backend service
-2. **All-in-one**: Railway hosts your app, database, and Redis in one place
-3. **Cost-effective**: Pay for what you use, no infrastructure management
-4. **Fast deployment**: Push to GitHub → auto-deploy to Railway
+1. **Portability**: Docker containers run consistently across any environment
+2. **All-in-one**: Docker Compose orchestrates your app, database, and Redis
+3. **Cost-effective**: Host anywhere (VPS, cloud, on-premise)
+4. **Fast deployment**: Build once, deploy anywhere
 
-### Railway Setup
+### Docker Setup
 
 ```bash
-# Install Railway CLI
-npm install -g @railway/cli
+# Start all services with Docker Compose
+docker-compose up -d
 
-# Login and initialize
-railway login
-railway init
+# View logs
+docker-compose logs -f
 
-# Add services
-railway add --database postgres
-railway add --database redis
-
-# Deploy
-railway up
+# Stop services
+docker-compose down
 ```
 
-Your environment variables (including `HAPPYROBOT_*`) are configured in the Railway dashboard.
+Your environment variables (including `HAPPYROBOT_*`) are configured in `.env` files.
 
 ---
 
