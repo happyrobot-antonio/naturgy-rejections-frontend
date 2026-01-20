@@ -9,7 +9,11 @@ import CaseRow from './CaseRow';
 type SortField = 'codigoSC' | 'nombreApellidos' | 'fechaPrimerContacto' | 'status';
 type SortOrder = 'asc' | 'desc';
 
-export default function CaseList() {
+interface CaseListProps {
+  externalStatusFilter?: string | null;
+}
+
+export default function CaseList({ externalStatusFilter }: CaseListProps) {
   const { cases, isLoading } = useCases();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<CaseStatus | 'all'>('all');
@@ -32,9 +36,10 @@ export default function CaseList() {
       );
     }
 
-    // Apply status filter
-    if (statusFilter !== 'all') {
-      filtered = filtered.filter(c => c.status === statusFilter);
+    // Apply status filter (external filter takes priority)
+    const activeStatusFilter = externalStatusFilter || statusFilter;
+    if (activeStatusFilter && activeStatusFilter !== 'all') {
+      filtered = filtered.filter(c => c.status === activeStatusFilter);
     }
 
     // Apply sorting
@@ -56,7 +61,7 @@ export default function CaseList() {
     });
 
     return filtered;
-  }, [cases, searchTerm, statusFilter, sortField, sortOrder]);
+  }, [cases, searchTerm, statusFilter, sortField, sortOrder, externalStatusFilter]);
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {

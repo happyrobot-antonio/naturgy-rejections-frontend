@@ -1,21 +1,29 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { casesApi } from '@/lib/api';
+import { casesApi, CasesStats } from '@/lib/api';
 import { Activity, Clock } from 'lucide-react';
+import StatusPieChart from './StatusPieChart';
 
-export default function Dashboard() {
-  const [stats, setStats] = useState({ inProgress: 0, pendingAction: 0 });
+interface DashboardProps {
+  selectedStatus: string | null;
+  onStatusClick: (status: string | null) => void;
+}
+
+export default function Dashboard({ selectedStatus, onStatusClick }: DashboardProps) {
+  const [stats, setStats] = useState<CasesStats>({ 
+    total: 0,
+    inProgress: 0, 
+    pendingAction: 0,
+    byStatus: []
+  });
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
         const data = await casesApi.getStats();
-        setStats({
-          inProgress: data.inProgress,
-          pendingAction: data.pendingAction,
-        });
+        setStats(data);
       } catch (error) {
         console.error('Error fetching stats:', error);
       } finally {
@@ -32,15 +40,27 @@ export default function Dashboard() {
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <div className="animate-pulse bg-white rounded-lg border border-gray-200 shadow-sm p-6 h-40" />
-        <div className="animate-pulse bg-white rounded-lg border border-gray-200 shadow-sm p-6 h-40" />
-      </div>
+      <>
+        <div className="animate-pulse bg-white rounded-lg border border-gray-200 shadow-sm p-6 h-80 mb-8" />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <div className="animate-pulse bg-white rounded-lg border border-gray-200 shadow-sm p-6 h-40" />
+          <div className="animate-pulse bg-white rounded-lg border border-gray-200 shadow-sm p-6 h-40" />
+        </div>
+      </>
     );
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+    <>
+      {/* Pie Chart */}
+      <StatusPieChart 
+        stats={stats} 
+        selectedStatus={selectedStatus}
+        onStatusClick={onStatusClick}
+      />
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
       {/* Comunicaciones En Curso */}
       <div className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden border-l-4 border-l-naturgy-orange">
         <div className="p-6">
@@ -92,6 +112,7 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 }
