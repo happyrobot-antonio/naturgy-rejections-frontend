@@ -1,7 +1,7 @@
 'use client';
 
 import { TimelineEvent } from '@/types/case';
-import { Mail, Phone, Paperclip, FileText, AlertCircle, Clock, Zap } from 'lucide-react';
+import { Mail, Phone, Paperclip, FileText, AlertCircle, Clock, Zap, HelpCircle } from 'lucide-react';
 
 interface TimelineProps {
   events: TimelineEvent[];
@@ -26,6 +26,8 @@ const getEventIcon = (type: string) => {
       return Paperclip;
     case 'email_received_no_attachment':
       return FileText;
+    case 'needs_assistance':
+      return HelpCircle;
     default:
       return FileText;
   }
@@ -51,6 +53,8 @@ const getEventColor = (type: string) => {
       return 'bg-purple-50 text-purple-600 border-purple-200';
     case 'email_received_no_attachment':
       return 'bg-indigo-50 text-indigo-600 border-indigo-200';
+    case 'needs_assistance':
+      return 'bg-red-50 text-red-600 border-red-200';
     default:
       return 'bg-gray-50 text-gray-600 border-gray-200';
   }
@@ -76,6 +80,8 @@ const getEventLabel = (type: string) => {
       return 'Email Recibido (con adjunto)';
     case 'email_received_no_attachment':
       return 'Email Recibido (sin adjunto)';
+    case 'needs_assistance':
+      return 'Necesita Asistencia';
     default:
       return 'Evento';
   }

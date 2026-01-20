@@ -17,6 +17,7 @@ import {
   Inbox,
   FileCheck,
   ExternalLink,
+  HelpCircle,
 } from 'lucide-react';
 
 interface CaseDetailProps {
@@ -28,7 +29,7 @@ export default function CaseDetail({ caseItem }: CaseDetailProps) {
   const [isAddingEvent, setIsAddingEvent] = useState(false);
 
   const handleAddEvent = async (
-    type: 'happyrobot_init' | 'email_not_found' | 'call_sent' | 'email_sent' | 'wait_24h' | 'wait_48h' | 'wait_72h' | 'email_received_with_attachment' | 'email_received_no_attachment',
+    type: 'happyrobot_init' | 'email_not_found' | 'call_sent' | 'email_sent' | 'wait_24h' | 'wait_48h' | 'wait_72h' | 'email_received_with_attachment' | 'email_received_no_attachment' | 'needs_assistance',
     description: string
   ) => {
     try {
@@ -185,6 +186,15 @@ export default function CaseDetail({ caseItem }: CaseDetailProps) {
               >
                 <Inbox className="w-5 h-5" />
                 <span className="text-xs font-semibold">Email Sin Doc</span>
+              </button>
+              
+              <button
+                onClick={() => handleAddEvent('needs_assistance', 'Requiere asistencia manual')}
+                disabled={isAddingEvent}
+                className="flex flex-col items-center justify-center space-y-2 px-4 py-3 bg-white border-2 border-red-600 text-red-600 rounded-lg hover:bg-red-600 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <HelpCircle className="w-5 h-5" />
+                <span className="text-xs font-semibold">Asistencia</span>
               </button>
             </div>
           </div>
