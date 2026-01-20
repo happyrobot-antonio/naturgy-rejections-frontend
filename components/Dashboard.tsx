@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { casesApi, CasesStats } from '@/lib/api';
-import { Activity, Clock } from 'lucide-react';
-import StatusPieChart from './StatusPieChart';
+import { Activity, Clock, FileText, AlertCircle, CheckCircle2 } from 'lucide-react';
 
 interface DashboardProps {
   selectedStatus: string | null;
@@ -38,73 +37,102 @@ export default function Dashboard({ selectedStatus, onStatusClick }: DashboardPr
     return () => clearInterval(interval);
   }, []);
 
+  const getStatusCount = (status: string) => {
+    const found = stats.byStatus.find(s => s.status === status);
+    return found ? found.count : 0;
+  };
+
   if (isLoading) {
     return (
-      <>
-        <div className="animate-pulse bg-white rounded-lg border border-gray-200 shadow-sm p-6 h-80 mb-8" />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          <div className="animate-pulse bg-white rounded-lg border border-gray-200 shadow-sm p-6 h-40" />
-          <div className="animate-pulse bg-white rounded-lg border border-gray-200 shadow-sm p-6 h-40" />
-        </div>
-      </>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+        {[1, 2, 3, 4, 5].map((i) => (
+          <div key={i} className="animate-pulse bg-white rounded-lg border border-gray-200 shadow-soft p-5 h-32" />
+        ))}
+      </div>
     );
   }
 
+  const statCards = [
+    {
+      label: 'Total',
+      value: stats.total,
+      icon: FileText,
+      color: 'gray',
+      bgColor: 'bg-gray-50',
+      textColor: 'text-gray-700',
+      status: null,
+    },
+    {
+      label: 'En Curso',
+      value: stats.inProgress,
+      icon: Activity,
+      color: 'orange',
+      bgColor: 'bg-orange-50',
+      textColor: 'text-naturgy-orange',
+      status: 'In progress',
+    },
+    {
+      label: 'Revisar Gestor',
+      value: getStatusCount('Revisar gestor'),
+      icon: AlertCircle,
+      color: 'blue',
+      bgColor: 'bg-blue-50',
+      textColor: 'text-naturgy-blue',
+      status: 'Revisar gestor',
+    },
+    {
+      label: 'Cancelar SC',
+      value: getStatusCount('Cancelar SC'),
+      icon: Clock,
+      color: 'red',
+      bgColor: 'bg-red-50',
+      textColor: 'text-red-600',
+      status: 'Cancelar SC',
+    },
+    {
+      label: 'Relanzar SC',
+      value: getStatusCount('Relanzar SC'),
+      icon: CheckCircle2,
+      color: 'green',
+      bgColor: 'bg-green-50',
+      textColor: 'text-green-600',
+      status: 'Relanzar SC',
+    },
+  ];
+
   return (
-    <>
-      {/* Pie Chart */}
-      <StatusPieChart 
-        stats={stats} 
-        selectedStatus={selectedStatus}
-        onStatusClick={onStatusClick}
-      />
-
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-        {/* Comunicaciones En Curso */}
-        <div className="bg-white rounded-lg border border-gray-200 shadow-soft hover:shadow-card-hover transition-all duration-200 p-5">
-          <div className="flex items-center justify-between">
-            <div className="flex-1">
-              <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
-                En Curso
-              </p>
-              <p className="text-4xl font-bold text-naturgy-orange">
-                {stats.inProgress}
-              </p>
-              <p className="text-xs text-gray-600 mt-2">
-                Casos activos
-              </p>
-            </div>
-            <div className="flex-shrink-0">
-              <div className="w-12 h-12 rounded-lg bg-orange-50 flex items-center justify-center">
-                <Activity className="w-6 h-6 text-naturgy-orange" />
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+      {statCards.map((card) => {
+        const Icon = card.icon;
+        const isSelected = selectedStatus === card.status;
+        
+        return (
+          <button
+            key={card.label}
+            onClick={() => onStatusClick(isSelected ? null : card.status)}
+            className={`bg-white rounded-lg border-2 transition-all duration-200 p-5 text-left hover:shadow-card-hover ${
+              isSelected
+                ? 'border-naturgy-orange shadow-card-hover'
+                : 'border-gray-200 hover:border-gray-300'
+            }`}
+          >
+            <div className="flex items-center justify-between mb-3">
+              <div className={`w-10 h-10 rounded-lg ${card.bgColor} flex items-center justify-center`}>
+                <Icon className={`w-5 h-5 ${card.textColor}`} />
               </div>
+              {isSelected && (
+                <div className="w-2 h-2 rounded-full bg-naturgy-orange animate-pulse" />
+              )}
             </div>
-          </div>
-        </div>
-
-        {/* Procesos Pendientes de Acción */}
-        <div className="bg-white rounded-lg border border-gray-200 shadow-soft hover:shadow-card-hover transition-all duration-200 p-5">
-          <div className="flex items-center justify-between">
-            <div className="flex-1">
-              <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
-                Pendientes
-              </p>
-              <p className="text-4xl font-bold text-naturgy-blue">
-                {stats.pendingAction}
-              </p>
-              <p className="text-xs text-gray-600 mt-2">
-                Requieren acción
-              </p>
-            </div>
-            <div className="flex-shrink-0">
-              <div className="w-12 h-12 rounded-lg bg-blue-50 flex items-center justify-center">
-                <Clock className="w-6 h-6 text-naturgy-blue" />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </>
+            <p className={`text-3xl font-bold ${card.textColor} mb-1`}>
+              {card.value}
+            </p>
+            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+              {card.label}
+            </p>
+          </button>
+        );
+      })}
+    </div>
   );
 }

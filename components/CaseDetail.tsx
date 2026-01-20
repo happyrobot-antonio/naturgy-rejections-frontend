@@ -30,9 +30,9 @@ export default function CaseDetail({ caseItem }: CaseDetailProps) {
   const { addTimelineEvent } = useCases();
   const [isAddingEvent, setIsAddingEvent] = useState(false);
   const [expandedSections, setExpandedSections] = useState({
-    contact: true,
+    contact: false,
     address: false,
-    contract: true,
+    contract: false,
     technical: false,
   });
 
