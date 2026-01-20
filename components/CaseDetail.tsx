@@ -121,21 +121,23 @@ export default function CaseDetail({ caseItem }: CaseDetailProps) {
       <div className="lg:col-span-1 space-y-6">
         {/* HappyRobot Link */}
         {caseItem.happyrobotUrl && (
-          <div className="bg-gradient-to-r from-[#e57200] to-[#ff8c1a] rounded-lg shadow-md overflow-hidden">
+          <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden hover:border-[#e57200] transition-colors">
             <a
               href={caseItem.happyrobotUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-between px-6 py-4 text-white hover:opacity-90 transition-opacity"
+              className="flex items-center justify-between px-6 py-4 group"
             >
               <div className="flex items-center space-x-3">
-                <Zap className="w-6 h-6" />
+                <div className="p-2 bg-[#e57200]/10 rounded-lg group-hover:bg-[#e57200]/20 transition-colors">
+                  <Zap className="w-5 h-5 text-[#e57200]" />
+                </div>
                 <div>
-                  <p className="text-sm font-semibold">Ver en HappyRobot</p>
-                  <p className="text-xs opacity-90">Seguimiento de automatización</p>
+                  <p className="text-sm font-semibold text-gray-900 group-hover:text-[#e57200] transition-colors">Ver en HappyRobot</p>
+                  <p className="text-xs text-gray-500">Seguimiento de automatización</p>
                 </div>
               </div>
-              <ExternalLink className="w-5 h-5" />
+              <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-[#e57200] transition-colors" />
             </a>
           </div>
         )}
