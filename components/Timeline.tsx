@@ -98,60 +98,54 @@ export default function Timeline({ events, codigoSC }: TimelineProps) {
 
   return (
     <div className="flow-root">
-      <ul className="-mb-6">
+      <ul className="-mb-4">
         {sortedEvents.map((event, eventIdx) => {
           const Icon = getEventIcon(event.type);
           const isLast = eventIdx === sortedEvents.length - 1;
+          const eventDate = new Date(event.timestamp);
+          const formattedDate = eventDate.toLocaleDateString('es-ES', {
+            day: '2-digit',
+            month: 'short',
+            hour: '2-digit',
+            minute: '2-digit',
+          });
 
           return (
             <li key={event.id}>
-              <div className="relative pb-6">
+              <div className="relative pb-4">
                 {!isLast && (
                   <span
-                    className="absolute left-4 top-9 -ml-px h-full w-0.5 bg-gray-200"
+                    className="absolute left-3 top-7 -ml-px h-full w-0.5 bg-gray-200"
                     aria-hidden="true"
                   />
                 )}
                 <div className="relative flex items-start space-x-3">
-                  <div className="relative">
+                  <div className="relative flex-shrink-0">
                     <div
-                      className={`h-8 w-8 rounded-full flex items-center justify-center border-2 ${getEventColor(
+                      className={`h-6 w-6 rounded-full flex items-center justify-center border ${getEventColor(
                         event.type
                       )}`}
                     >
-                      <Icon className="h-4 w-4" />
+                      <Icon className="h-3 w-3" />
                     </div>
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <div>
-                      <div className="text-sm font-semibold text-gray-900">
+                  <div className="min-w-0 flex-1 py-0.5">
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-sm font-medium text-gray-900">
                         {getEventLabel(event.type)}
-                      </div>
-                      <p className="mt-1 text-xs text-gray-500">
-                        {new Date(event.timestamp).toLocaleString('es-ES', {
-                          year: 'numeric',
-                          month: 'short',
-                          day: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })}
-                      </p>
+                      </span>
+                      {event.description && (
+                        <>
+                          <span className="text-gray-400">•</span>
+                          <span className="text-sm text-gray-600 flex-1">
+                            {event.description}
+                          </span>
+                        </>
+                      )}
                     </div>
-                    {event.description && (
-                      <div className="mt-2 text-sm text-gray-700 bg-gray-50 rounded px-3 py-2 border border-gray-200">
-                        {event.description}
-                      </div>
-                    )}
-                    {event.metadata && Object.keys(event.metadata).length > 0 && (
-                      <div className="mt-2 text-xs text-gray-600 bg-gray-50 rounded px-3 py-2 border border-gray-200">
-                        {Object.entries(event.metadata).map(([key, value]) => (
-                          <div key={key} className="flex items-start space-x-2">
-                            <span className="font-medium">{key}:</span>
-                            <span className="flex-1">{String(value)}</span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
+                    <p className="text-xs text-gray-400 mt-0.5" title={eventDate.toLocaleString('es-ES')}>
+                      {formattedDate}
+                    </p>
                   </div>
                 </div>
               </div>
