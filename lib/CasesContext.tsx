@@ -21,6 +21,8 @@ interface CasesContextType {
   getCaseByCodigoSC: (codigoSC: string) => RejectionCase | undefined;
   isLoading: boolean;
   error: string | null;
+  lastUpdated: Date | null;
+  isRefreshing: boolean;
 }
 
 const CasesContext = createContext<CasesContextType | undefined>(undefined);
@@ -28,26 +30,51 @@ const CasesContext = createContext<CasesContextType | undefined>(undefined);
 export function CasesProvider({ children }: { children: ReactNode }) {
   const [cases, setCasesState] = useState<RejectionCase[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   // Load cases from API on mount
-  const refreshCases = async () => {
+  const refreshCases = async (isBackgroundRefresh = false) => {
     try {
-      setIsLoading(true);
+      if (!isBackgroundRefresh) {
+        setIsLoading(true);
+      } else {
+        setIsRefreshing(true);
+      }
       setError(null);
       const { cases: fetchedCases } = await casesApi.getAll();
-      setCasesState(fetchedCases);
+      
+      // Check if data has changed
+      const hasChanges = JSON.stringify(cases) !== JSON.stringify(fetchedCases);
+      if (hasChanges || !isBackgroundRefresh) {
+        setCasesState(fetchedCases);
+        setLastUpdated(new Date());
+      }
     } catch (err) {
       console.error('Error loading cases from API:', err);
-      setError(err instanceof Error ? err.message : 'Failed to load cases');
+      if (!isBackgroundRefresh) {
+        setError(err instanceof Error ? err.message : 'Failed to load cases');
+      }
     } finally {
       setIsLoading(false);
+      setIsRefreshing(false);
     }
   };
 
+  // Initial load
   useEffect(() => {
     refreshCases();
   }, []);
+
+  // Smart polling: every 10 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      refreshCases(true);
+    }, 10000);
+
+    return () => clearInterval(interval);
+  }, [cases]); // Re-create interval when cases change to compare against latest
 
   const setCases = (newCases: RejectionCase[]) => {
     setCasesState(newCases);
@@ -123,7 +150,7 @@ export function CasesProvider({ children }: { children: ReactNode }) {
       value={{
         cases,
         setCases,
-        refreshCases,
+        refreshCases: () => refreshCases(false),
         addCase,
         updateCase,
         deleteCase,
@@ -131,6 +158,8 @@ export function CasesProvider({ children }: { children: ReactNode }) {
         getCaseByCodigoSC,
         isLoading,
         error,
+        lastUpdated,
+        isRefreshing,
       }}
     >
       {children}

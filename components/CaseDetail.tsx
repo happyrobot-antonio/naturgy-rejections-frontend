@@ -18,6 +18,8 @@ import {
   FileCheck,
   ExternalLink,
   HelpCircle,
+  ChevronDown,
+  ChevronUp,
 } from 'lucide-react';
 
 interface CaseDetailProps {
@@ -27,6 +29,12 @@ interface CaseDetailProps {
 export default function CaseDetail({ caseItem }: CaseDetailProps) {
   const { addTimelineEvent } = useCases();
   const [isAddingEvent, setIsAddingEvent] = useState(false);
+  const [expandedSections, setExpandedSections] = useState({
+    contact: true,
+    address: false,
+    contract: true,
+    technical: false,
+  });
 
   const handleAddEvent = async (
     type: 'happyrobot_init' | 'email_not_found' | 'call_sent' | 'email_sent' | 'wait_24h' | 'wait_48h' | 'wait_72h' | 'email_received_with_attachment' | 'email_received_no_attachment' | 'needs_assistance',
@@ -46,6 +54,10 @@ export default function CaseDetail({ caseItem }: CaseDetailProps) {
     }
   };
 
+  const toggleSection = (section: keyof typeof expandedSections) => {
+    setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
+  };
+
   const InfoRow = ({
     icon: Icon,
     label,
@@ -55,161 +67,188 @@ export default function CaseDetail({ caseItem }: CaseDetailProps) {
     label: string;
     value: string;
   }) => (
-    <div className="flex items-start space-x-3 py-3">
-      <Icon className="w-5 h-5 text-gray-400 mt-0.5 flex-shrink-0" />
+    <div className="flex items-center space-x-2 py-2">
+      <Icon className="w-4 h-4 text-gray-400 flex-shrink-0" />
       <div className="flex-1 min-w-0">
-        <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">{label}</p>
-        <p className="text-sm text-gray-900">{value || '-'}</p>
+        <p className="text-xs text-gray-500">{label}</p>
+        <p className="text-sm text-gray-900 truncate">{value || '-'}</p>
       </div>
     </div>
   );
 
-  const SectionCard = ({ title, icon: Icon, children }: { title: string; icon: any; children: React.ReactNode }) => (
-    <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-      <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
-        <h3 className="text-sm font-semibold text-gray-700 flex items-center">
-          <Icon className="w-5 h-5 mr-2 text-gray-500" />
-          {title}
-        </h3>
+  const CollapsibleSection = ({
+    title,
+    icon: Icon,
+    sectionKey,
+    children,
+  }: {
+    title: string;
+    icon: any;
+    sectionKey: keyof typeof expandedSections;
+    children: React.ReactNode;
+  }) => {
+    const isExpanded = expandedSections[sectionKey];
+    return (
+      <div className="border-b border-gray-100">
+        <button
+          onClick={() => toggleSection(sectionKey)}
+          className="w-full flex items-center justify-between px-6 py-3 hover:bg-gray-50 transition-colors"
+        >
+          <div className="flex items-center space-x-2">
+            <Icon className="w-4 h-4 text-gray-500" />
+            <span className="text-sm font-medium text-gray-700">{title}</span>
+          </div>
+          {isExpanded ? (
+            <ChevronUp className="w-4 h-4 text-gray-400" />
+          ) : (
+            <ChevronDown className="w-4 h-4 text-gray-400" />
+          )}
+        </button>
+        {isExpanded && <div className="px-6 pb-4 space-y-1">{children}</div>}
       </div>
-      <div className="px-6 py-4 divide-y divide-gray-100">
-        {children}
-      </div>
-    </div>
-  );
+    );
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'In progress':
+        return 'bg-orange-50 text-orange-700 border-orange-200';
+      case 'Revisar gestor':
+        return 'bg-blue-50 text-blue-700 border-blue-200';
+      case 'Cancelar SC':
+        return 'bg-gray-50 text-gray-700 border-gray-200';
+      default:
+        return 'bg-gray-50 text-gray-700 border-gray-200';
+    }
+  };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      {/* Left Column: Basic Info */}
-      <div className="lg:col-span-1 space-y-6">
-        <SectionCard title="Información del Cliente" icon={User}>
-          <InfoRow icon={Hash} label="DNI/CIF" value={caseItem.dniCif} />
-          <InfoRow icon={User} label="Nombre" value={caseItem.nombreApellidos} />
-          <InfoRow icon={Mail} label="Email" value={caseItem.emailContacto} />
-          <InfoRow icon={Phone} label="Teléfono" value={caseItem.telefonoContacto} />
-        </SectionCard>
-
-        <SectionCard title="Dirección" icon={MapPin}>
-          <InfoRow icon={MapPin} label="Dirección" value={caseItem.direccionCompleta} />
-          <InfoRow icon={Hash} label="Código Postal" value={caseItem.codigoPostal} />
-          <InfoRow icon={MapPin} label="Municipio" value={caseItem.municipio} />
-          <InfoRow icon={MapPin} label="Provincia" value={caseItem.provincia} />
-          <InfoRow icon={MapPin} label="CCAA" value={caseItem.ccaa} />
-        </SectionCard>
+    <div className="flex flex-col h-full">
+      {/* Header Section */}
+      <div className="px-6 py-4 border-b border-gray-100">
+        <div className="flex items-start justify-between mb-2">
+          <div>
+            <h2 className="text-xl font-bold text-naturgy-blue">{caseItem.codigoSC}</h2>
+            <p className="text-sm text-gray-600 mt-1">{caseItem.nombreApellidos}</p>
+          </div>
+          <span
+            className={`px-2.5 py-1 rounded-full text-xs font-medium border ${getStatusColor(
+              caseItem.status
+            )}`}
+          >
+            {caseItem.status}
+          </span>
+        </div>
+        <div className="text-xs text-gray-500">{caseItem.proceso}</div>
       </div>
 
-      {/* Middle Column: Contract & Technical Info */}
-      <div className="lg:col-span-1 space-y-6">
-        <SectionCard title="Información del Contrato" icon={FileText}>
-          <InfoRow icon={Hash} label="CUPS" value={caseItem.cups} />
-          <InfoRow icon={Hash} label="Contrato NC" value={caseItem.contratoNC} />
-          <InfoRow icon={FileText} label="Línea de Negocio" value={caseItem.lineaNegocio} />
-          <InfoRow icon={FileText} label="Proceso" value={caseItem.proceso} />
-        </SectionCard>
-
-        <SectionCard title="Información Técnica" icon={Zap}>
-          <InfoRow icon={Zap} label="Potencia Actual" value={caseItem.potenciaActual} />
-          <InfoRow icon={Zap} label="Potencia Solicitada" value={caseItem.potenciaSolicitada} />
-        </SectionCard>
-
-        <SectionCard title="Distribuidora" icon={Building}>
-          <InfoRow icon={Building} label="Distribuidora" value={caseItem.distribuidora} />
-          <InfoRow icon={Building} label="Grupo Distribuidora" value={caseItem.grupoDistribuidora} />
-        </SectionCard>
-      </div>
-
-      {/* Right Column: Timeline & Actions */}
-      <div className="lg:col-span-1 space-y-6">
+      {/* Scrollable Content */}
+      <div className="flex-1 overflow-y-auto">
         {/* HappyRobot Link */}
         {caseItem.happyrobotUrl && (
-          <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden hover:border-[#e57200] transition-colors">
+          <div className="mx-6 my-4">
             <a
               href={caseItem.happyrobotUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center justify-between px-6 py-4 group"
+              className="flex items-center justify-between px-4 py-3 bg-orange-50 border border-orange-200 rounded-lg hover:bg-orange-100 transition-colors group"
             >
-              <div className="flex items-center space-x-3">
-                <div className="p-2 bg-[#e57200]/10 rounded-lg group-hover:bg-[#e57200]/20 transition-colors">
-                  <Zap className="w-5 h-5 text-[#e57200]" />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-gray-900 group-hover:text-[#e57200] transition-colors">Ver en HappyRobot</p>
-                  <p className="text-xs text-gray-500">Seguimiento de automatización</p>
-                </div>
+              <div className="flex items-center space-x-2">
+                <Zap className="w-4 h-4 text-naturgy-orange" />
+                <span className="text-sm font-medium text-gray-900">Ver en HappyRobot</span>
               </div>
-              <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-[#e57200] transition-colors" />
+              <ExternalLink className="w-4 h-4 text-gray-400 group-hover:text-naturgy-orange transition-colors" />
             </a>
           </div>
         )}
 
         {/* Quick Actions */}
-        <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-          <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
-            <h3 className="text-sm font-semibold text-gray-700">
-              Acciones Rápidas
-            </h3>
-          </div>
-          <div className="p-4">
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                onClick={() => handleAddEvent('email_sent', 'Email enviado al cliente')}
-                disabled={isAddingEvent}
-                className="flex flex-col items-center justify-center space-y-2 px-4 py-3 bg-white border-2 border-naturgy-orange text-naturgy-orange rounded-lg hover:bg-naturgy-orange hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <Send className="w-5 h-5" />
-                <span className="text-xs font-semibold">Enviar Email</span>
-              </button>
-              
-              <button
-                onClick={() => handleAddEvent('call_sent', 'Llamada enviada')}
-                disabled={isAddingEvent}
-                className="flex flex-col items-center justify-center space-y-2 px-4 py-3 bg-white border-2 border-naturgy-blue text-naturgy-blue rounded-lg hover:bg-naturgy-blue hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <PhoneCall className="w-5 h-5" />
-                <span className="text-xs font-semibold">Llamada</span>
-              </button>
-              
-              <button
-                onClick={() => handleAddEvent('email_received_with_attachment', 'Email recibido con documentación adjunta')}
-                disabled={isAddingEvent}
-                className="flex flex-col items-center justify-center space-y-2 px-4 py-3 bg-white border-2 border-green-600 text-green-600 rounded-lg hover:bg-green-600 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <FileCheck className="w-5 h-5" />
-                <span className="text-xs font-semibold">Email + Doc</span>
-              </button>
-              
-              <button
-                onClick={() => handleAddEvent('email_received_no_attachment', 'Email recibido sin documentación')}
-                disabled={isAddingEvent}
-                className="flex flex-col items-center justify-center space-y-2 px-4 py-3 bg-white border-2 border-gray-600 text-gray-600 rounded-lg hover:bg-gray-600 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <Inbox className="w-5 h-5" />
-                <span className="text-xs font-semibold">Email Sin Doc</span>
-              </button>
-              
-              <button
-                onClick={() => handleAddEvent('needs_assistance', 'Requiere asistencia manual')}
-                disabled={isAddingEvent}
-                className="flex flex-col items-center justify-center space-y-2 px-4 py-3 bg-white border-2 border-red-600 text-red-600 rounded-lg hover:bg-red-600 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <HelpCircle className="w-5 h-5" />
-                <span className="text-xs font-semibold">Asistencia</span>
-              </button>
-            </div>
+        <div className="mx-6 mb-4">
+          <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
+            Acciones Rápidas
+          </h3>
+          <div className="grid grid-cols-3 gap-2">
+            <button
+              onClick={() => handleAddEvent('email_sent', 'Email enviado al cliente')}
+              disabled={isAddingEvent}
+              className="flex flex-col items-center justify-center p-3 bg-white border border-gray-200 text-gray-700 rounded-lg hover:border-naturgy-orange hover:text-naturgy-orange transition-colors disabled:opacity-50"
+            >
+              <Send className="w-4 h-4 mb-1" />
+              <span className="text-xs">Email</span>
+            </button>
+            
+            <button
+              onClick={() => handleAddEvent('call_sent', 'Llamada enviada')}
+              disabled={isAddingEvent}
+              className="flex flex-col items-center justify-center p-3 bg-white border border-gray-200 text-gray-700 rounded-lg hover:border-naturgy-blue hover:text-naturgy-blue transition-colors disabled:opacity-50"
+            >
+              <PhoneCall className="w-4 h-4 mb-1" />
+              <span className="text-xs">Llamada</span>
+            </button>
+            
+            <button
+              onClick={() => handleAddEvent('email_received_with_attachment', 'Email recibido con documentación')}
+              disabled={isAddingEvent}
+              className="flex flex-col items-center justify-center p-3 bg-white border border-gray-200 text-gray-700 rounded-lg hover:border-green-600 hover:text-green-600 transition-colors disabled:opacity-50"
+            >
+              <FileCheck className="w-4 h-4 mb-1" />
+              <span className="text-xs">Doc+</span>
+            </button>
+            
+            <button
+              onClick={() => handleAddEvent('email_received_no_attachment', 'Email sin documentación')}
+              disabled={isAddingEvent}
+              className="flex flex-col items-center justify-center p-3 bg-white border border-gray-200 text-gray-700 rounded-lg hover:border-gray-600 hover:text-gray-600 transition-colors disabled:opacity-50"
+            >
+              <Inbox className="w-4 h-4 mb-1" />
+              <span className="text-xs">Doc-</span>
+            </button>
+            
+            <button
+              onClick={() => handleAddEvent('needs_assistance', 'Requiere asistencia manual')}
+              disabled={isAddingEvent}
+              className="flex flex-col items-center justify-center p-3 bg-white border border-gray-200 text-gray-700 rounded-lg hover:border-red-600 hover:text-red-600 transition-colors disabled:opacity-50"
+            >
+              <HelpCircle className="w-4 h-4 mb-1" />
+              <span className="text-xs">Ayuda</span>
+            </button>
           </div>
         </div>
 
+        {/* Information Sections */}
+        <div className="border-t border-gray-100">
+          <CollapsibleSection title="Contacto" icon={User} sectionKey="contact">
+            <InfoRow icon={Hash} label="DNI/CIF" value={caseItem.dniCif} />
+            <InfoRow icon={Mail} label="Email" value={caseItem.emailContacto} />
+            <InfoRow icon={Phone} label="Teléfono" value={caseItem.telefonoContacto} />
+          </CollapsibleSection>
+
+          <CollapsibleSection title="Dirección" icon={MapPin} sectionKey="address">
+            <InfoRow icon={MapPin} label="Dirección" value={caseItem.direccionCompleta} />
+            <InfoRow icon={Hash} label="CP" value={caseItem.codigoPostal} />
+            <InfoRow icon={MapPin} label="Municipio" value={caseItem.municipio} />
+            <InfoRow icon={MapPin} label="Provincia" value={caseItem.provincia} />
+          </CollapsibleSection>
+
+          <CollapsibleSection title="Contrato" icon={FileText} sectionKey="contract">
+            <InfoRow icon={Hash} label="CUPS" value={caseItem.cups} />
+            <InfoRow icon={Hash} label="Contrato NC" value={caseItem.contratoNC} />
+            <InfoRow icon={FileText} label="Línea Negocio" value={caseItem.lineaNegocio} />
+            <InfoRow icon={Building} label="Distribuidora" value={caseItem.distribuidora} />
+          </CollapsibleSection>
+
+          <CollapsibleSection title="Técnico" icon={Zap} sectionKey="technical">
+            <InfoRow icon={Zap} label="Potencia Actual" value={caseItem.potenciaActual} />
+            <InfoRow icon={Zap} label="Potencia Solicitada" value={caseItem.potenciaSolicitada} />
+          </CollapsibleSection>
+        </div>
+
         {/* Timeline */}
-        <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-          <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
-            <h3 className="text-sm font-semibold text-gray-700">
-              Línea de Tiempo
-            </h3>
-          </div>
-          <div className="px-6 py-4">
-            <Timeline events={caseItem.events || []} codigoSC={caseItem.codigoSC} />
-          </div>
+        <div className="mt-6 px-6 pb-6">
+          <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-4">
+            Línea de Tiempo
+          </h3>
+          <Timeline events={caseItem.events || []} codigoSC={caseItem.codigoSC} />
         </div>
       </div>
     </div>

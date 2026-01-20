@@ -58,45 +58,45 @@ export default function Header() {
 
   return (
     <>
-      <header className="bg-white border-b-4 border-naturgy-orange shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
+      <header className="bg-white border-b border-gray-200 shadow-soft">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-6">
+            <div className="flex items-center space-x-4">
               <Image
                 src="/naturgy-logo.png"
                 alt="Naturgy"
-                width={150}
-                height={50}
-                className="h-14 w-auto"
+                width={120}
+                height={40}
+                className="h-10 w-auto"
                 priority
               />
-              <div className="hidden sm:block h-10 w-px bg-gray-300" />
-              <h1 className="hidden sm:block text-xl font-bold text-naturgy-blue">
+              <div className="hidden sm:block h-6 w-px bg-gray-200" />
+              <h1 className="hidden sm:block text-base font-semibold text-gray-700">
                 Gestión de Rechazos
               </h1>
             </div>
 
             {/* Action Buttons */}
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-2">
               {/* Reset DB Button */}
               <button
                 onClick={handleResetDatabase}
                 disabled={isResetting}
-                className="flex items-center space-x-2 px-4 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors shadow-sm hover:shadow-md font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex items-center space-x-1.5 px-3 py-2 bg-white border border-red-300 text-red-600 rounded-lg hover:bg-red-50 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                 title="Reiniciar Base de Datos"
               >
-                <Database className="w-5 h-5" />
-                <span className="hidden lg:inline">
-                  {isResetting ? 'Reiniciando...' : 'Reset DB'}
+                <Database className="w-4 h-4" />
+                <span className="hidden lg:inline text-sm">
+                  {isResetting ? 'Reiniciando...' : 'Reset'}
                 </span>
               </button>
 
               {/* Upload Button */}
               <button
                 onClick={() => setIsUploadModalOpen(true)}
-                className="flex items-center space-x-2 px-6 py-3 bg-naturgy-orange text-white rounded-lg hover:bg-orange-600 transition-colors shadow-sm hover:shadow-md font-semibold"
+                className="flex items-center space-x-1.5 px-4 py-2 bg-naturgy-orange text-white rounded-lg hover:bg-orange-600 transition-colors text-sm font-medium"
               >
-                <Upload className="w-5 h-5" />
+                <Upload className="w-4 h-4" />
                 <span className="hidden sm:inline">Cargar Excel</span>
               </button>
             </div>

@@ -60,58 +60,50 @@ export default function Dashboard({ selectedStatus, onStatusClick }: DashboardPr
       />
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-      {/* Comunicaciones En Curso */}
-      <div className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden border-l-4 border-l-naturgy-orange">
-        <div className="p-6">
-          <div className="flex items-start justify-between mb-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+        {/* Comunicaciones En Curso */}
+        <div className="bg-white rounded-lg border border-gray-200 shadow-soft hover:shadow-card-hover transition-all duration-200 p-5">
+          <div className="flex items-center justify-between">
             <div className="flex-1">
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
-                Comunicaciones En Curso
+              <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
+                En Curso
               </p>
-              <p className="text-5xl font-bold text-naturgy-orange">
+              <p className="text-4xl font-bold text-naturgy-orange">
                 {stats.inProgress}
               </p>
+              <p className="text-xs text-gray-600 mt-2">
+                Casos activos
+              </p>
             </div>
             <div className="flex-shrink-0">
-              <div className="w-14 h-14 rounded-full border-2 border-naturgy-orange flex items-center justify-center bg-orange-50">
-                <Activity className="w-7 h-7 text-naturgy-orange" />
+              <div className="w-12 h-12 rounded-lg bg-orange-50 flex items-center justify-center">
+                <Activity className="w-6 h-6 text-naturgy-orange" />
               </div>
             </div>
           </div>
-          <div className="pt-4 border-t border-gray-100">
-            <p className="text-sm text-gray-600">
-              Casos actualmente en proceso
-            </p>
-          </div>
         </div>
-      </div>
 
-      {/* Procesos Pendientes de Acción */}
-      <div className="bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden border-l-4 border-l-naturgy-blue">
-        <div className="p-6">
-          <div className="flex items-start justify-between mb-4">
+        {/* Procesos Pendientes de Acción */}
+        <div className="bg-white rounded-lg border border-gray-200 shadow-soft hover:shadow-card-hover transition-all duration-200 p-5">
+          <div className="flex items-center justify-between">
             <div className="flex-1">
-              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
-                Pendientes de Acción
+              <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
+                Pendientes
               </p>
-              <p className="text-5xl font-bold text-naturgy-blue">
+              <p className="text-4xl font-bold text-naturgy-blue">
                 {stats.pendingAction}
               </p>
+              <p className="text-xs text-gray-600 mt-2">
+                Requieren acción
+              </p>
             </div>
             <div className="flex-shrink-0">
-              <div className="w-14 h-14 rounded-full border-2 border-naturgy-blue flex items-center justify-center bg-blue-50">
-                <Clock className="w-7 h-7 text-naturgy-blue" />
+              <div className="w-12 h-12 rounded-lg bg-blue-50 flex items-center justify-center">
+                <Clock className="w-6 h-6 text-naturgy-blue" />
               </div>
             </div>
           </div>
-          <div className="pt-4 border-t border-gray-100">
-            <p className="text-sm text-gray-600">
-              Casos esperando revisión o cancelación
-            </p>
-          </div>
         </div>
-      </div>
       </div>
     </>
   );

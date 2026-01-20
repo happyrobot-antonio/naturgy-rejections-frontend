@@ -2,24 +2,24 @@
 
 import { useState, useMemo } from 'react';
 import { useCases } from '@/lib/CasesContext';
-import { Search, Filter, ChevronDown, ChevronUp } from 'lucide-react';
+import { Search, Filter, ArrowUpDown } from 'lucide-react';
 import { RejectionCase, CaseStatus } from '@/types/case';
-import CaseRow from './CaseRow';
+import CaseCard from './CaseCard';
 
 type SortField = 'codigoSC' | 'nombreApellidos' | 'fechaPrimerContacto' | 'status';
 type SortOrder = 'asc' | 'desc';
 
 interface CaseListProps {
   externalStatusFilter?: string | null;
+  onCaseClick: (caseItem: RejectionCase) => void;
 }
 
-export default function CaseList({ externalStatusFilter }: CaseListProps) {
+export default function CaseList({ externalStatusFilter, onCaseClick }: CaseListProps) {
   const { cases, isLoading } = useCases();
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<CaseStatus | 'all'>('all');
   const [sortField, setSortField] = useState<SortField>('fechaPrimerContacto');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
-  const [expandedCase, setExpandedCase] = useState<string | null>(null);
 
   const filteredAndSortedCases = useMemo(() => {
     let filtered = [...cases];
@@ -72,21 +72,14 @@ export default function CaseList({ externalStatusFilter }: CaseListProps) {
     }
   };
 
-  const SortIcon = ({ field }: { field: SortField }) => {
-    if (sortField !== field) return null;
-    return sortOrder === 'asc' ? (
-      <ChevronUp className="w-4 h-4" />
-    ) : (
-      <ChevronDown className="w-4 h-4" />
-    );
-  };
-
   if (isLoading) {
     return (
-      <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6">
-        <div className="animate-pulse space-y-4">
-          <div className="h-12 bg-gray-200 rounded" />
-          <div className="h-64 bg-gray-200 rounded" />
+      <div>
+        <div className="mb-4 h-12 bg-gray-100 rounded-lg animate-pulse" />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <div key={i} className="h-40 bg-gray-100 rounded-lg animate-pulse" />
+          ))}
         </div>
       </div>
     );
@@ -94,14 +87,14 @@ export default function CaseList({ externalStatusFilter }: CaseListProps) {
 
   if (cases.length === 0) {
     return (
-      <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-12 text-center">
-        <div className="text-gray-400 mb-4">
+      <div className="bg-white rounded-lg border border-gray-200 shadow-soft p-12 text-center">
+        <div className="text-gray-300 mb-4">
           <Filter className="w-16 h-16 mx-auto" />
         </div>
-        <h3 className="text-xl font-semibold text-gray-700 mb-2">
+        <h3 className="text-lg font-semibold text-gray-700 mb-2">
           No hay casos cargados
         </h3>
-        <p className="text-gray-500">
+        <p className="text-sm text-gray-500">
           Sube un archivo Excel para comenzar a gestionar los rechazos
         </p>
       </div>
@@ -109,109 +102,76 @@ export default function CaseList({ externalStatusFilter }: CaseListProps) {
   }
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-      {/* Filters and Search */}
-      <div className="p-6 border-b border-gray-200 bg-gray-50">
-        <div className="flex flex-col sm:flex-row gap-4">
+    <div className="space-y-4">
+      {/* Filters Bar */}
+      <div className="bg-white rounded-lg border border-gray-200 shadow-soft p-4">
+        <div className="flex flex-col sm:flex-row gap-3">
           {/* Search */}
           <div className="flex-1 relative">
-            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
               type="text"
-              placeholder="Buscar por código, nombre, CUPS o proceso..."
+              placeholder="Buscar por código, nombre, CUPS..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-naturgy-orange focus:border-transparent bg-white text-sm"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-naturgy-orange focus:border-transparent text-sm"
             />
           </div>
 
           {/* Status Filter */}
-          <div className="flex items-center space-x-3">
-            <Filter className="w-5 h-5 text-gray-500" />
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value as CaseStatus | 'all')}
-              className="px-4 py-3 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-naturgy-orange focus:border-transparent bg-white text-sm font-medium"
-            >
-              <option value="all">Todos los estados</option>
-              <option value="In progress">In progress</option>
-              <option value="Revisar gestor">Revisar gestor</option>
-              <option value="Cancelar SC">Cancelar SC</option>
-            </select>
-          </div>
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value as CaseStatus | 'all')}
+            className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-naturgy-orange focus:border-transparent text-sm"
+          >
+            <option value="all">Todos los estados</option>
+            <option value="In progress">In progress</option>
+            <option value="Revisar gestor">Revisar gestor</option>
+            <option value="Cancelar SC">Cancelar SC</option>
+          </select>
+
+          {/* Sort */}
+          <select
+            value={`${sortField}-${sortOrder}`}
+            onChange={(e) => {
+              const [field, order] = e.target.value.split('-');
+              setSortField(field as SortField);
+              setSortOrder(order as SortOrder);
+            }}
+            className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-naturgy-orange focus:border-transparent text-sm"
+          >
+            <option value="fechaPrimerContacto-desc">Más recientes</option>
+            <option value="fechaPrimerContacto-asc">Más antiguos</option>
+            <option value="codigoSC-asc">Código A-Z</option>
+            <option value="codigoSC-desc">Código Z-A</option>
+            <option value="nombreApellidos-asc">Nombre A-Z</option>
+            <option value="nombreApellidos-desc">Nombre Z-A</option>
+          </select>
         </div>
 
         {/* Results count */}
-        <div className="mt-4 text-sm text-gray-600 font-medium">
-          Mostrando {filteredAndSortedCases.length} de {cases.length} casos
+        <div className="mt-3 text-xs text-gray-500">
+          {filteredAndSortedCases.length} {filteredAndSortedCases.length === 1 ? 'caso' : 'casos'}
+          {filteredAndSortedCases.length !== cases.length && ` de ${cases.length} totales`}
         </div>
       </div>
 
-      {/* Table */}
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead className="bg-gray-100 border-b-2 border-gray-200">
-            <tr>
-              <th
-                onClick={() => handleSort('codigoSC')}
-                className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider cursor-pointer hover:bg-gray-200 transition-colors"
-              >
-                <div className="flex items-center space-x-1">
-                  <span>Código SC</span>
-                  <SortIcon field="codigoSC" />
-                </div>
-              </th>
-              <th
-                onClick={() => handleSort('nombreApellidos')}
-                className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider cursor-pointer hover:bg-gray-200 transition-colors"
-              >
-                <div className="flex items-center space-x-1">
-                  <span>Nombre</span>
-                  <SortIcon field="nombreApellidos" />
-                </div>
-              </th>
-              <th
-                onClick={() => handleSort('status')}
-                className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider cursor-pointer hover:bg-gray-200 transition-colors"
-              >
-                <div className="flex items-center space-x-1">
-                  <span>Estado</span>
-                  <SortIcon field="status" />
-                </div>
-              </th>
-              <th
-                onClick={() => handleSort('fechaPrimerContacto')}
-                className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider cursor-pointer hover:bg-gray-200 transition-colors"
-              >
-                <div className="flex items-center space-x-1">
-                  <span>Fecha</span>
-                  <SortIcon field="fechaPrimerContacto" />
-                </div>
-              </th>
-              <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                Proceso
-              </th>
-              <th className="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                Acciones
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {filteredAndSortedCases.map((caseItem) => (
-              <CaseRow
-                key={caseItem.codigoSC}
-                caseItem={caseItem}
-                isExpanded={expandedCase === caseItem.codigoSC}
-                onToggle={() =>
-                  setExpandedCase(
-                    expandedCase === caseItem.codigoSC ? null : caseItem.codigoSC
-                  )
-                }
-              />
-            ))}
-          </tbody>
-        </table>
-      </div>
+      {/* Card Grid */}
+      {filteredAndSortedCases.length === 0 ? (
+        <div className="bg-white rounded-lg border border-gray-200 shadow-soft p-12 text-center">
+          <p className="text-sm text-gray-500">No se encontraron casos con los filtros aplicados</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filteredAndSortedCases.map((caseItem) => (
+            <CaseCard
+              key={caseItem.codigoSC}
+              caseItem={caseItem}
+              onClick={() => onCaseClick(caseItem)}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

@@ -2,6 +2,8 @@
 
 import { TimelineEvent } from '@/types/case';
 import { Mail, Phone, Paperclip, FileText, AlertCircle, Clock, Zap, HelpCircle } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 interface TimelineProps {
   events: TimelineEvent[];
@@ -33,43 +35,40 @@ const getEventIcon = (type: string) => {
   }
 };
 
-const getEventColor = (type: string) => {
+const getEventDotColor = (type: string) => {
   switch (type) {
     case 'happyrobot_init':
-      return 'bg-[#e57200]/10 text-[#e57200] border-[#e57200]/30';
+      return 'bg-naturgy-orange';
     case 'email_not_found':
-      return 'bg-red-50 text-red-600 border-red-200';
-    case 'call_sent':
-      return 'bg-green-50 text-green-600 border-green-200';
-    case 'email_sent':
-      return 'bg-blue-50 text-blue-600 border-blue-200';
-    case 'wait_24h':
-      return 'bg-yellow-50 text-yellow-600 border-yellow-200';
-    case 'wait_48h':
-      return 'bg-amber-50 text-amber-600 border-amber-200';
-    case 'wait_72h':
-      return 'bg-orange-50 text-orange-600 border-orange-200';
-    case 'email_received_with_attachment':
-      return 'bg-purple-50 text-purple-600 border-purple-200';
-    case 'email_received_no_attachment':
-      return 'bg-indigo-50 text-indigo-600 border-indigo-200';
     case 'needs_assistance':
-      return 'bg-red-50 text-red-600 border-red-200';
+      return 'bg-red-500';
+    case 'call_sent':
+      return 'bg-green-500';
+    case 'email_sent':
+      return 'bg-blue-500';
+    case 'wait_24h':
+    case 'wait_48h':
+    case 'wait_72h':
+      return 'bg-yellow-500';
+    case 'email_received_with_attachment':
+      return 'bg-purple-500';
+    case 'email_received_no_attachment':
+      return 'bg-indigo-500';
     default:
-      return 'bg-gray-50 text-gray-600 border-gray-200';
+      return 'bg-gray-400';
   }
 };
 
 const getEventLabel = (type: string) => {
   switch (type) {
     case 'happyrobot_init':
-      return 'Automatización Iniciada';
+      return 'Automatización iniciada';
     case 'email_not_found':
-      return 'Email No Encontrado';
+      return 'Email no encontrado';
     case 'call_sent':
-      return 'Llamada Enviada';
+      return 'Llamada enviada';
     case 'email_sent':
-      return 'Email Enviado';
+      return 'Email enviado';
     case 'wait_24h':
       return 'Esperar 24h';
     case 'wait_48h':
@@ -77,11 +76,11 @@ const getEventLabel = (type: string) => {
     case 'wait_72h':
       return 'Esperar 72h';
     case 'email_received_with_attachment':
-      return 'Email Recibido (con adjunto)';
+      return 'Email con adjunto';
     case 'email_received_no_attachment':
-      return 'Email Recibido (sin adjunto)';
+      return 'Email sin adjunto';
     case 'needs_assistance':
-      return 'Necesita Asistencia';
+      return 'Necesita asistencia';
     default:
       return 'Evento';
   }
@@ -90,9 +89,9 @@ const getEventLabel = (type: string) => {
 export default function Timeline({ events, codigoSC }: TimelineProps) {
   if (!events || events.length === 0) {
     return (
-      <div className="text-center py-8 text-gray-500">
-        <FileText className="w-12 h-12 mx-auto mb-3 text-gray-300" />
-        <p className="text-sm">No hay eventos registrados</p>
+      <div className="text-center py-6 text-gray-400">
+        <FileText className="w-8 h-8 mx-auto mb-2 opacity-30" />
+        <p className="text-xs">Sin eventos</p>
       </div>
     );
   }
@@ -103,62 +102,41 @@ export default function Timeline({ events, codigoSC }: TimelineProps) {
   );
 
   return (
-    <div className="flow-root">
-      <ul className="-mb-4">
-        {sortedEvents.map((event, eventIdx) => {
-          const Icon = getEventIcon(event.type);
-          const isLast = eventIdx === sortedEvents.length - 1;
-          const eventDate = new Date(event.timestamp);
-          const formattedDate = eventDate.toLocaleDateString('es-ES', {
-            day: '2-digit',
-            month: 'short',
-            hour: '2-digit',
-            minute: '2-digit',
-          });
+    <div className="space-y-3">
+      {sortedEvents.map((event, eventIdx) => {
+        const Icon = getEventIcon(event.type);
+        const isLast = eventIdx === sortedEvents.length - 1;
+        const eventDate = new Date(event.timestamp);
+        const relativeTime = formatDistanceToNow(eventDate, { addSuffix: true, locale: es });
 
-          return (
-            <li key={event.id}>
-              <div className="relative pb-4">
-                {!isLast && (
-                  <span
-                    className="absolute left-3 top-7 -ml-px h-full w-0.5 bg-gray-200"
-                    aria-hidden="true"
-                  />
-                )}
-                <div className="relative flex items-start space-x-3">
-                  <div className="relative flex-shrink-0">
-                    <div
-                      className={`h-6 w-6 rounded-full flex items-center justify-center border ${getEventColor(
-                        event.type
-                      )}`}
-                    >
-                      <Icon className="h-3 w-3" />
-                    </div>
-                  </div>
-                  <div className="min-w-0 flex-1 py-0.5">
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-sm font-medium text-gray-900">
-                        {getEventLabel(event.type)}
-                      </span>
-                      {event.description && (
-                        <>
-                          <span className="text-gray-400">•</span>
-                          <span className="text-sm text-gray-600 flex-1">
-                            {event.description}
-                          </span>
-                        </>
-                      )}
-                    </div>
-                    <p className="text-xs text-gray-400 mt-0.5" title={eventDate.toLocaleString('es-ES')}>
-                      {formattedDate}
-                    </p>
-                  </div>
+        return (
+          <div key={event.id} className="relative">
+            {/* Vertical line */}
+            {!isLast && (
+              <div className="absolute left-2 top-5 bottom-0 w-px bg-gray-200" />
+            )}
+            
+            {/* Event content */}
+            <div className="flex items-start space-x-3">
+              {/* Icon dot */}
+              <div className="relative flex-shrink-0 mt-0.5">
+                <div className={`h-4 w-4 rounded-full ${getEventDotColor(event.type)} flex items-center justify-center`}>
+                  <Icon className="h-2.5 w-2.5 text-white" strokeWidth={2.5} />
                 </div>
               </div>
-            </li>
-          );
-        })}
-      </ul>
+              
+              {/* Event info */}
+              <div className="flex-1 min-w-0 pb-3">
+                <p className="text-sm font-medium text-gray-900">{getEventLabel(event.type)}</p>
+                {event.description && (
+                  <p className="text-xs text-gray-600 mt-0.5 line-clamp-2">{event.description}</p>
+                )}
+                <p className="text-xs text-gray-400 mt-1">{relativeTime}</p>
+              </div>
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }
