@@ -12,14 +12,7 @@ services:
       - /app/.next
     environment:
       - NODE_ENV=development
-      # Future HappyRobot integration environment variables
-      # - HAPPYROBOT_WEBHOOK_URL=
-      # - HAPPYROBOT_X_API_KEY=
-      # - HAPPYROBOT_API_KEY=
-      # - HAPPYROBOT_ORG_ID=
-      # - HAPPYROBOT_ORG_SLUG=
-      # - HAPPYROBOT_WORKFLOW_ID=
-      # - APP_URL=
+      - NEXT_PUBLIC_API_URL=http://localhost:4000/api
     command: npm run dev
     networks:
       - naturgy-network
