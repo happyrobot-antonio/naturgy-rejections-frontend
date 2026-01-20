@@ -16,6 +16,7 @@ import {
   PhoneCall,
   Inbox,
   FileCheck,
+  ExternalLink,
 } from 'lucide-react';
 
 interface CaseDetailProps {
@@ -27,7 +28,7 @@ export default function CaseDetail({ caseItem }: CaseDetailProps) {
   const [isAddingEvent, setIsAddingEvent] = useState(false);
 
   const handleAddEvent = async (
-    type: 'happyrobot_init' | 'email_not_found' | 'call_sent_to_get_email' | 'email_sent' | 'wait_24h' | 'wait_48h' | 'wait_72h' | 'email_received_with_attachment' | 'email_received_no_attachment',
+    type: 'happyrobot_init' | 'email_not_found' | 'call_sent' | 'email_sent' | 'wait_24h' | 'wait_48h' | 'wait_72h' | 'email_received_with_attachment' | 'email_received_no_attachment',
     description: string
   ) => {
     try {
@@ -118,6 +119,27 @@ export default function CaseDetail({ caseItem }: CaseDetailProps) {
 
       {/* Right Column: Timeline & Actions */}
       <div className="lg:col-span-1 space-y-6">
+        {/* HappyRobot Link */}
+        {caseItem.happyrobotUrl && (
+          <div className="bg-gradient-to-r from-[#e57200] to-[#ff8c1a] rounded-lg shadow-md overflow-hidden">
+            <a
+              href={caseItem.happyrobotUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-between px-6 py-4 text-white hover:opacity-90 transition-opacity"
+            >
+              <div className="flex items-center space-x-3">
+                <Zap className="w-6 h-6" />
+                <div>
+                  <p className="text-sm font-semibold">Ver en HappyRobot</p>
+                  <p className="text-xs opacity-90">Seguimiento de automatización</p>
+                </div>
+              </div>
+              <ExternalLink className="w-5 h-5" />
+            </a>
+          </div>
+        )}
+
         {/* Quick Actions */}
         <div className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
           <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
@@ -137,7 +159,7 @@ export default function CaseDetail({ caseItem }: CaseDetailProps) {
               </button>
               
               <button
-                onClick={() => handleAddEvent('call_sent_to_get_email', 'Llamada enviada para obtener email')}
+                onClick={() => handleAddEvent('call_sent', 'Llamada enviada')}
                 disabled={isAddingEvent}
                 className="flex flex-col items-center justify-center space-y-2 px-4 py-3 bg-white border-2 border-naturgy-blue text-naturgy-blue rounded-lg hover:bg-naturgy-blue hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >

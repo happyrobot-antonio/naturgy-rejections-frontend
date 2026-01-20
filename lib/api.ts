@@ -25,6 +25,8 @@ export interface RejectionCase {
   status: string;
   emailThreadId?: string;
   fechaPrimerContacto: string;
+  happyrobotRunId?: string;
+  happyrobotUrl?: string;
   events: TimelineEvent[];
   createdAt: string;
   updatedAt: string;
@@ -33,7 +35,7 @@ export interface RejectionCase {
 export interface TimelineEvent {
   id: string;
   caseId: string;
-  type: 'happyrobot_init' | 'email_not_found' | 'call_sent_to_get_email' | 'email_sent' | 'wait_24h' | 'wait_48h' | 'wait_72h' | 'email_received_with_attachment' | 'email_received_no_attachment';
+  type: 'happyrobot_init' | 'email_not_found' | 'call_sent' | 'email_sent' | 'wait_24h' | 'wait_48h' | 'wait_72h' | 'email_received_with_attachment' | 'email_received_no_attachment';
   description: string;
   metadata?: any;
   timestamp: string;
@@ -64,7 +66,7 @@ export interface CreateCaseInput {
 }
 
 export interface CreateEventInput {
-  type: 'happyrobot_init' | 'email_not_found' | 'call_sent_to_get_email' | 'email_sent' | 'wait_24h' | 'wait_48h' | 'wait_72h' | 'email_received_with_attachment' | 'email_received_no_attachment';
+  type: 'happyrobot_init' | 'email_not_found' | 'call_sent' | 'email_sent' | 'wait_24h' | 'wait_48h' | 'wait_72h' | 'email_received_with_attachment' | 'email_received_no_attachment';
   description: string;
   metadata?: Record<string, any>;
 }
