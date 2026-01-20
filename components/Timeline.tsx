@@ -14,7 +14,7 @@ const getEventIcon = (type: string) => {
       return Zap;
     case 'email_not_found':
       return AlertCircle;
-    case 'call_sent_to_get_email':
+    case 'call_sent':
       return Phone;
     case 'email_sent':
       return Mail;
@@ -37,7 +37,7 @@ const getEventColor = (type: string) => {
       return 'bg-[#e57200]/10 text-[#e57200] border-[#e57200]/30';
     case 'email_not_found':
       return 'bg-red-50 text-red-600 border-red-200';
-    case 'call_sent_to_get_email':
+    case 'call_sent':
       return 'bg-green-50 text-green-600 border-green-200';
     case 'email_sent':
       return 'bg-blue-50 text-blue-600 border-blue-200';
@@ -62,8 +62,8 @@ const getEventLabel = (type: string) => {
       return 'Automatización Iniciada';
     case 'email_not_found':
       return 'Email No Encontrado';
-    case 'call_sent_to_get_email':
-      return 'Llamada Enviada para Obtener Email';
+    case 'call_sent':
+      return 'Llamada Enviada';
     case 'email_sent':
       return 'Email Enviado';
     case 'wait_24h':
