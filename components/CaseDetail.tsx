@@ -243,7 +243,7 @@ export default function CaseDetail({ caseItem }: CaseDetailProps) {
           <div className="bg-white w-full rounded-t-2xl p-6 shadow-2xl animate-slide-up">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900">
-                {pendingAction === 'relaunch' ? '🔄 Relanzar en SF' : '❌ Cancelar en SF'}
+                {pendingAction === 'relaunch' ? 'Relanzar en SF' : 'Cancelar en SF'}
               </h3>
               <button
                 onClick={handleCancelAction}
