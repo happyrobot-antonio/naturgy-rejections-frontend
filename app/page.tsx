@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Dashboard from '@/components/Dashboard';
 import CaseList from '@/components/CaseList';
@@ -11,7 +11,7 @@ import AnalyzeDashboard from '@/components/AnalyzeDashboard';
 import { RejectionCase } from '@/types/case';
 import { useCases } from '@/lib/CasesContext';
 
-export default function Home() {
+function HomeContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { cases } = useCases();
@@ -70,5 +70,13 @@ export default function Home() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gray-50 flex items-center justify-center">Cargando...</div>}>
+      <HomeContent />
+    </Suspense>
   );
 }
