@@ -46,11 +46,11 @@ export default function LoginScreen({ onSuccess }: LoginScreenProps) {
       {/* Logos */}
       <div className="flex items-center gap-4 mb-12">
         <Image
-          src="/logo-cuad.png"
+          src="/naturgy-logo.png"
           alt="Naturgy"
-          width={48}
-          height={48}
-          className="h-12 w-12"
+          width={120}
+          height={40}
+          className="h-10 w-auto"
         />
         <span className="text-gray-300 text-3xl font-light">|</span>
         <Image
