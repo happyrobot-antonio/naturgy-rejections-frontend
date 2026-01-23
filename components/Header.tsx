@@ -102,7 +102,7 @@ export default function Header({ currentView, onViewChange }: HeaderProps) {
               className="flex items-center gap-2 px-4 py-2 bg-naturgy-orange text-white rounded-lg text-sm font-medium hover:bg-orange-600 transition-colors duration-200 shadow-sm"
             >
               <Upload className="w-4 h-4" />
-              <span className="hidden sm:inline">Upload Excel</span>
+              <span className="hidden sm:inline">Subir Excel</span>
             </button>
           </div>
         </div>
