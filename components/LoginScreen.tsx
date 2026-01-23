@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { Loader2, Lock } from 'lucide-react';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
 
 interface LoginScreenProps {
   onSuccess: () => void;
@@ -21,7 +21,7 @@ export default function LoginScreen({ onSuccess }: LoginScreenProps) {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+      const response = await fetch(`${API_BASE_URL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ password }),

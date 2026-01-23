@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import LoginScreen from './LoginScreen';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
 
 interface AuthWrapperProps {
   children: React.ReactNode;
@@ -24,7 +24,7 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
       }
 
       try {
-        const response = await fetch(`${API_BASE_URL}/api/auth/verify`, {
+        const response = await fetch(`${API_BASE_URL}/auth/verify`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ password: savedPassword }),
