@@ -9,9 +9,10 @@ import ExcelPreview from './ExcelPreview';
 
 interface ExcelUploadProps {
   onSuccess?: () => void;
+  onClose?: () => void;
 }
 
-export default function ExcelUpload({ onSuccess }: ExcelUploadProps) {
+export default function ExcelUpload({ onSuccess, onClose }: ExcelUploadProps) {
   const { cases, addCase, refreshCases } = useCases();
   const [isDragging, setIsDragging] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
