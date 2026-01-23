@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import { useCases } from '@/lib/CasesContext';
-import { Search, Filter, ArrowUpDown } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { RejectionCase, CaseStatus } from '@/types/case';
 import CaseCard from './CaseCard';
 
@@ -15,9 +15,8 @@ interface CaseListProps {
 }
 
 export default function CaseList({ externalStatusFilter, onCaseClick }: CaseListProps) {
-  const { cases, isLoading } = useCases();
+  const { cases, isLoading, updatedCases } = useCases();
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<CaseStatus | 'all'>('all');
   const [sortField, setSortField] = useState<SortField>('fechaPrimerContacto');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc');
 
@@ -36,10 +35,9 @@ export default function CaseList({ externalStatusFilter, onCaseClick }: CaseList
       );
     }
 
-    // Apply status filter (external filter takes priority)
-    const activeStatusFilter = externalStatusFilter || statusFilter;
-    if (activeStatusFilter && activeStatusFilter !== 'all') {
-      filtered = filtered.filter(c => c.status === activeStatusFilter);
+    // Apply status filter (external filter from Dashboard)
+    if (externalStatusFilter && externalStatusFilter !== 'all') {
+      filtered = filtered.filter(c => c.status === externalStatusFilter);
     }
 
     // Apply sorting
@@ -61,113 +59,78 @@ export default function CaseList({ externalStatusFilter, onCaseClick }: CaseList
     });
 
     return filtered;
-  }, [cases, searchTerm, statusFilter, sortField, sortOrder, externalStatusFilter]);
-
-  const handleSort = (field: SortField) => {
-    if (sortField === field) {
-      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
-    } else {
-      setSortField(field);
-      setSortOrder('asc');
-    }
-  };
+  }, [cases, searchTerm, sortField, sortOrder, externalStatusFilter]);
 
   if (isLoading) {
     return (
-      <div>
-        <div className="mb-4 h-12 bg-gray-100 rounded-lg animate-pulse" />
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div key={i} className="h-40 bg-gray-100 rounded-lg animate-pulse" />
-          ))}
+      <div className="bg-white">
+        <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-100 animate-pulse">
+          <div className="flex-1 h-6 bg-gray-100 rounded" />
+          <div className="w-32 h-6 bg-gray-100 rounded" />
         </div>
+        {[1, 2, 3, 4, 5].map((i) => (
+          <div key={i} className="px-4 py-3 border-b border-gray-100 animate-pulse">
+            <div className="h-4 bg-gray-100 rounded mb-2" />
+            <div className="h-3 bg-gray-100 rounded w-2/3" />
+          </div>
+        ))}
       </div>
     );
   }
 
   if (cases.length === 0) {
     return (
-      <div className="bg-white rounded-lg border border-gray-200 shadow-soft p-12 text-center">
-        <div className="text-gray-300 mb-4">
-          <Filter className="w-16 h-16 mx-auto" />
-        </div>
-        <h3 className="text-lg font-semibold text-gray-700 mb-2">
-          No hay casos cargados
-        </h3>
-        <p className="text-sm text-gray-500">
-          Sube un archivo Excel para comenzar a gestionar los rechazos
-        </p>
+      <div className="bg-white p-12 text-center text-gray-400 text-sm">
+        No hay casos cargados
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
-      {/* Filters Bar */}
-      <div className="bg-white rounded-lg border border-gray-200 shadow-soft p-4">
-        <div className="flex flex-col sm:flex-row gap-3">
-          {/* Search */}
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Buscar por código, nombre, CUPS..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-naturgy-orange focus:border-transparent text-sm"
-            />
-          </div>
-
-          {/* Status Filter */}
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value as CaseStatus | 'all')}
-            className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-naturgy-orange focus:border-transparent text-sm"
-          >
-            <option value="all">Todos los estados</option>
-            <option value="In progress">In progress</option>
-            <option value="Revisar gestor">Revisar gestor</option>
-            <option value="Cancelar SC">Cancelar SC</option>
-          </select>
-
-          {/* Sort */}
-          <select
-            value={`${sortField}-${sortOrder}`}
-            onChange={(e) => {
-              const [field, order] = e.target.value.split('-');
-              setSortField(field as SortField);
-              setSortOrder(order as SortOrder);
-            }}
-            className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-naturgy-orange focus:border-transparent text-sm"
-          >
-            <option value="fechaPrimerContacto-desc">Más recientes</option>
-            <option value="fechaPrimerContacto-asc">Más antiguos</option>
-            <option value="codigoSC-asc">Código A-Z</option>
-            <option value="codigoSC-desc">Código Z-A</option>
-            <option value="nombreApellidos-asc">Nombre A-Z</option>
-            <option value="nombreApellidos-desc">Nombre Z-A</option>
-          </select>
+    <div className="bg-white">
+      {/* Inline Search and Sort */}
+      <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-100">
+        <div className="flex-1 relative">
+          <Search className="absolute left-0 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Buscar caso..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full pl-6 pr-2 py-1 text-sm bg-transparent border-b border-transparent focus:border-gray-400 outline-none transition-colors duration-200 placeholder:text-gray-400"
+          />
         </div>
 
-        {/* Results count */}
-        <div className="mt-3 text-xs text-gray-500">
-          {filteredAndSortedCases.length} {filteredAndSortedCases.length === 1 ? 'caso' : 'casos'}
-          {filteredAndSortedCases.length !== cases.length && ` de ${cases.length} totales`}
-        </div>
+        <select
+          value={`${sortField}-${sortOrder}`}
+          onChange={(e) => {
+            const [field, order] = e.target.value.split('-');
+            setSortField(field as SortField);
+            setSortOrder(order as SortOrder);
+          }}
+          className="text-xs text-gray-600 bg-transparent border-0 outline-none cursor-pointer"
+        >
+          <option value="fechaPrimerContacto-desc">Más recientes</option>
+          <option value="fechaPrimerContacto-asc">Más antiguos</option>
+          <option value="codigoSC-asc">Código A-Z</option>
+          <option value="codigoSC-desc">Código Z-A</option>
+          <option value="nombreApellidos-asc">Nombre A-Z</option>
+        </select>
       </div>
 
-      {/* Card Grid */}
+      {/* Case List */}
       {filteredAndSortedCases.length === 0 ? (
-        <div className="bg-white rounded-lg border border-gray-200 shadow-soft p-12 text-center">
-          <p className="text-sm text-gray-500">No se encontraron casos con los filtros aplicados</p>
+        <div className="px-4 py-12 text-center text-gray-400 text-sm">
+          No se encontraron casos
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div>
           {filteredAndSortedCases.map((caseItem) => (
             <CaseCard
               key={caseItem.codigoSC}
               caseItem={caseItem}
               onClick={() => onCaseClick(caseItem)}
+              isUpdated={updatedCases.has(caseItem.codigoSC)}
             />
           ))}
         </div>

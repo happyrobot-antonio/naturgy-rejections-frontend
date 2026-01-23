@@ -2,116 +2,114 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { Upload, Database } from 'lucide-react';
+import { Upload, RefreshCw } from 'lucide-react';
 import Modal from './Modal';
 import ExcelUpload from './ExcelUpload';
+import ViewSwitcher from './ViewSwitcher';
+import { useCases } from '@/lib/CasesContext';
+import { formatDistanceToNow } from 'date-fns';
+import { es } from 'date-fns/locale';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+interface HeaderProps {
+  currentView: 'monitor' | 'analyze';
+  onViewChange: (view: 'monitor' | 'analyze') => void;
+}
 
-export default function Header() {
+export default function Header({ currentView, onViewChange }: HeaderProps) {
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
-  const [isResetting, setIsResetting] = useState(false);
+  const [isManualRefreshing, setIsManualRefreshing] = useState(false);
+  const { lastUpdated, isRefreshing, hasRecentActivity, refreshCases } = useCases();
 
-  const handleResetDatabase = async () => {
-    const confirmed = window.confirm(
-      '⚠️ ¿Estás seguro de que quieres REINICIAR la base de datos?\n\n' +
-      'Esto eliminará TODOS los casos y eventos.\n\n' +
-      'Esta acción NO se puede deshacer.'
-    );
+  const handleManualRefresh = async () => {
+    setIsManualRefreshing(true);
+    await refreshCases();
+    setTimeout(() => setIsManualRefreshing(false), 1000);
+  };
 
-    if (!confirmed) return;
-
-    // Double confirmation
-    const doubleConfirm = window.confirm(
-      '⚠️⚠️ ÚLTIMA CONFIRMACIÓN ⚠️⚠️\n\n' +
-      'Se eliminarán TODOS los datos.\n\n' +
-      '¿Realmente deseas continuar?'
-    );
-
-    if (!doubleConfirm) return;
-
-    setIsResetting(true);
-
-    try {
-      const response = await fetch(`${API_BASE_URL}/admin/reset-db`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to reset database');
-      }
-
-      const data = await response.json();
-      
-      alert('✅ Base de datos reiniciada exitosamente!\n\nRecargando página...');
-      
-      // Reload page to refresh data
-      window.location.reload();
-    } catch (error) {
-      console.error('Error resetting database:', error);
-      alert('❌ Error al reiniciar la base de datos. Ver consola para detalles.');
-    } finally {
-      setIsResetting(false);
-    }
+  const getTimeSinceUpdate = () => {
+    if (!lastUpdated) return 'nunca';
+    return formatDistanceToNow(lastUpdated, { addSuffix: true, locale: es });
   };
 
   return (
     <>
-      <header className="bg-white border-b border-gray-200 shadow-soft">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
+      <header className="bg-white shadow-sm sticky top-0 z-40 border-b border-gray-200">
+        <div className="grid grid-cols-3 items-center h-16 px-6 max-w-7xl mx-auto">
+          {/* Left Section - Logos and Status */}
+          <div className="flex items-center gap-6">
+            {/* Logos Section */}
+            <div className="flex items-center gap-4">
+              {/* Naturgy Logo */}
               <Image
-                src="/naturgy-logo.png"
+                src="/naturgy-logo-cuad.png"
                 alt="Naturgy"
-                width={120}
-                height={40}
-                className="h-10 w-auto"
+                width={32}
+                height={32}
+                className="h-8 w-8"
                 priority
               />
-              <div className="hidden sm:block h-6 w-px bg-gray-200" />
-              <h1 className="hidden sm:block text-base font-semibold text-gray-700">
-                Gestión de Rechazos
-              </h1>
+              <span className="text-gray-300 text-2xl font-light">|</span>
+              {/* HappyRobot Logo */}
+              <Image
+                src="/happyrobot-logo.svg"
+                alt="HappyRobot"
+                width={100}
+                height={16}
+                className="h-4 w-auto"
+                priority
+              />
             </div>
-
-            {/* Action Buttons */}
-            <div className="flex items-center space-x-2">
-              {/* Reset DB Button */}
-              <button
-                onClick={handleResetDatabase}
-                disabled={isResetting}
-                className="flex items-center space-x-1.5 px-3 py-2 bg-white border border-red-300 text-red-600 rounded-lg hover:bg-red-50 transition-colors text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-                title="Reiniciar Base de Datos"
-              >
-                <Database className="w-4 h-4" />
-                <span className="hidden lg:inline text-sm">
-                  {isResetting ? 'Reiniciando...' : 'Reset'}
-                </span>
-              </button>
-
-              {/* Upload Button */}
-              <button
-                onClick={() => setIsUploadModalOpen(true)}
-                className="flex items-center space-x-1.5 px-4 py-2 bg-naturgy-orange text-white rounded-lg hover:bg-orange-600 transition-colors text-sm font-medium"
-              >
-                <Upload className="w-4 h-4" />
-                <span className="hidden sm:inline">Cargar Excel</span>
-              </button>
+            
+            {/* Status Indicators */}
+            <div className="flex items-center gap-4 ml-4">
+              <div className="flex items-center gap-2 text-xs text-gray-600">
+                <span className={`w-2 h-2 rounded-full ${isRefreshing ? 'bg-orange-500 animate-pulse' : 'bg-green-500 animate-pulse-slow'}`} />
+                <span>{isRefreshing ? 'Actualizando...' : `En vivo · ${getTimeSinceUpdate()}`}</span>
+              </div>
+              
+              {hasRecentActivity && (
+                <div className="flex items-center gap-2 text-xs text-orange-600 font-medium">
+                  <span className="relative flex h-3 w-3">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-orange-500"></span>
+                  </span>
+                  <span>Actividad reciente</span>
+                </div>
+              )}
             </div>
+          </div>
+
+          {/* Center Section - View Switcher */}
+          <div className="flex justify-center">
+            <ViewSwitcher currentView={currentView} onViewChange={onViewChange} />
+          </div>
+
+          {/* Right Section - Action Buttons */}
+          <div className="flex justify-end items-center gap-3">
+            {/* Refresh Button */}
+            <button
+              onClick={handleManualRefresh}
+              disabled={isManualRefreshing}
+              className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors duration-200 disabled:opacity-50"
+              title="Actualizar datos"
+            >
+              <RefreshCw className={`w-4 h-4 ${isManualRefreshing ? 'animate-spin' : ''}`} />
+            </button>
+
+            {/* Upload Button */}
+            <button
+              onClick={() => setIsUploadModalOpen(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-naturgy-orange text-white rounded-lg text-sm font-medium hover:bg-orange-600 transition-colors duration-200 shadow-sm"
+            >
+              <Upload className="w-4 h-4" />
+              <span className="hidden sm:inline">Upload Excel</span>
+            </button>
           </div>
         </div>
       </header>
 
-      {/* Excel Upload Modal */}
-      <Modal
-        isOpen={isUploadModalOpen}
-        onClose={() => setIsUploadModalOpen(false)}
-        title="Cargar Casos desde Excel"
-        size="large"
-      >
-        <ExcelUpload onSuccess={() => setIsUploadModalOpen(false)} />
+      <Modal isOpen={isUploadModalOpen} onClose={() => setIsUploadModalOpen(false)}>
+        <ExcelUpload onClose={() => setIsUploadModalOpen(false)} />
       </Modal>
     </>
   );

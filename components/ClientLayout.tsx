@@ -1,15 +1,11 @@
 'use client';
 
 import { CasesProvider } from '@/lib/CasesContext';
-import Header from './Header';
 
 export default function ClientLayout({ children }: { children: React.ReactNode }) {
   return (
     <CasesProvider>
       <div className="min-h-screen flex flex-col">
-        {/* Header with Naturgy branding and Upload button */}
-        <Header />
-
         {/* Main content */}
         <main className="flex-1">
           {children}

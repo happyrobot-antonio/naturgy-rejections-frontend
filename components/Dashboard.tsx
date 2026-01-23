@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { casesApi, CasesStats } from '@/lib/api';
-import { Activity, Clock, FileText, AlertCircle, CheckCircle2 } from 'lucide-react';
 
 interface DashboardProps {
   selectedStatus: string | null;
@@ -32,7 +31,6 @@ export default function Dashboard({ selectedStatus, onStatusClick }: DashboardPr
 
     fetchStats();
     
-    // Refresh stats every 30 seconds
     const interval = setInterval(fetchStats, 30000);
     return () => clearInterval(interval);
   }, []);
@@ -44,95 +42,78 @@ export default function Dashboard({ selectedStatus, onStatusClick }: DashboardPr
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
-        {[1, 2, 3, 4, 5].map((i) => (
-          <div key={i} className="animate-pulse bg-white rounded-lg border border-gray-200 shadow-soft p-5 h-32" />
-        ))}
+      <div className="flex items-center justify-between py-4 px-4 border-b border-gray-100 bg-white animate-pulse">
+        <div className="h-8 w-20 bg-gray-100 rounded" />
+        <div className="h-8 w-20 bg-gray-100 rounded" />
+        <div className="h-8 w-20 bg-gray-100 rounded" />
+        <div className="h-8 w-20 bg-gray-100 rounded" />
+        <div className="h-8 w-20 bg-gray-100 rounded" />
       </div>
     );
   }
 
-  const statCards = [
-    {
-      label: 'Total',
-      value: stats.total,
-      icon: FileText,
-      color: 'gray',
-      bgColor: 'bg-gray-50',
-      textColor: 'text-gray-700',
+  const statItems = [
+    { 
+      label: 'TOTAL', 
+      value: stats.total, 
       status: null,
+      color: 'text-gray-700',
+      hoverColor: 'group-hover:text-gray-900'
     },
-    {
-      label: 'En Curso',
-      value: stats.inProgress,
-      icon: Activity,
-      color: 'orange',
-      bgColor: 'bg-orange-50',
-      textColor: 'text-naturgy-orange',
+    { 
+      label: 'EN CURSO', 
+      value: stats.inProgress, 
       status: 'In progress',
+      color: 'text-blue-600',
+      hoverColor: 'group-hover:text-blue-700'
     },
-    {
-      label: 'Revisar Gestor',
-      value: getStatusCount('Revisar gestor'),
-      icon: AlertCircle,
-      color: 'blue',
-      bgColor: 'bg-blue-50',
-      textColor: 'text-naturgy-blue',
+    { 
+      label: 'REVISAR', 
+      value: getStatusCount('Revisar gestor'), 
       status: 'Revisar gestor',
+      color: 'text-naturgy-orange',
+      hoverColor: 'group-hover:text-orange-600'
     },
-    {
-      label: 'Cancelar SC',
-      value: getStatusCount('Cancelar SC'),
-      icon: Clock,
-      color: 'red',
-      bgColor: 'bg-red-50',
-      textColor: 'text-red-600',
+    { 
+      label: 'CANCELAR', 
+      value: getStatusCount('Cancelar SC'), 
       status: 'Cancelar SC',
+      color: 'text-red-600',
+      hoverColor: 'group-hover:text-red-700'
     },
-    {
-      label: 'Relanzar SC',
-      value: getStatusCount('Relanzar SC'),
-      icon: CheckCircle2,
-      color: 'green',
-      bgColor: 'bg-green-50',
-      textColor: 'text-green-600',
+    { 
+      label: 'RELANZAR', 
+      value: getStatusCount('Relanzar SC'), 
       status: 'Relanzar SC',
+      color: 'text-naturgy-blue',
+      hoverColor: 'group-hover:text-blue-700'
     },
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
-      {statCards.map((card) => {
-        const Icon = card.icon;
-        const isSelected = selectedStatus === card.status;
-        
-        return (
-          <button
-            key={card.label}
-            onClick={() => onStatusClick(isSelected ? null : card.status)}
-            className={`bg-white rounded-lg border-2 transition-all duration-200 p-5 text-left hover:shadow-card-hover ${
-              isSelected
-                ? 'border-naturgy-orange shadow-card-hover'
-                : 'border-gray-200 hover:border-gray-300'
-            }`}
-          >
-            <div className="flex items-center justify-between mb-3">
-              <div className={`w-10 h-10 rounded-lg ${card.bgColor} flex items-center justify-center`}>
-                <Icon className={`w-5 h-5 ${card.textColor}`} />
+    <div className="py-4 px-4 border-b border-gray-100 bg-white transition-colors duration-200">
+      <div className="flex items-center justify-between">
+        {statItems.map((item) => {
+          const isSelected = selectedStatus === item.status;
+          
+          return (
+            <button
+              key={item.label}
+              onClick={() => onStatusClick(isSelected ? null : item.status)}
+              className="flex flex-col items-center gap-1 transition-all duration-200 group"
+            >
+              <div className={`flex items-baseline gap-2 transition-colors duration-200 ${
+                isSelected 
+                  ? item.color + ' scale-105' 
+                  : 'text-gray-500 ' + item.hoverColor
+              }`}>
+                <span className="text-2xl font-bold">{item.value}</span>
+                <span className="text-xs uppercase tracking-wide font-medium">{item.label}</span>
               </div>
-              {isSelected && (
-                <div className="w-2 h-2 rounded-full bg-naturgy-orange animate-pulse" />
-              )}
-            </div>
-            <p className={`text-3xl font-bold ${card.textColor} mb-1`}>
-              {card.value}
-            </p>
-            <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
-              {card.label}
-            </p>
-          </button>
-        );
-      })}
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }

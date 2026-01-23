@@ -23,6 +23,8 @@ interface CasesContextType {
   error: string | null;
   lastUpdated: Date | null;
   isRefreshing: boolean;
+  updatedCases: Set<string>;
+  hasRecentActivity: boolean;
 }
 
 const CasesContext = createContext<CasesContextType | undefined>(undefined);
@@ -33,6 +35,9 @@ export function CasesProvider({ children }: { children: ReactNode }) {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [updatedCases, setUpdatedCases] = useState<Set<string>>(new Set());
+  const [hasRecentActivity, setHasRecentActivity] = useState(false);
+  const [lastActivityTime, setLastActivityTime] = useState<Date | null>(null);
 
   // Load cases from API on mount
   const refreshCases = async (isBackgroundRefresh = false) => {
@@ -45,9 +50,26 @@ export function CasesProvider({ children }: { children: ReactNode }) {
       setError(null);
       const { cases: fetchedCases } = await casesApi.getAll();
       
-      // Check if data has changed
+      // Check if data has changed and track which cases changed
       const hasChanges = JSON.stringify(cases) !== JSON.stringify(fetchedCases);
       if (hasChanges || !isBackgroundRefresh) {
+        // Find changed cases
+        if (hasChanges && isBackgroundRefresh) {
+          const changedCaseIds = new Set<string>();
+          fetchedCases.forEach(newCase => {
+            const oldCase = cases.find(c => c.codigoSC === newCase.codigoSC);
+            if (!oldCase || JSON.stringify(oldCase) !== JSON.stringify(newCase)) {
+              changedCaseIds.add(newCase.codigoSC);
+            }
+          });
+          setUpdatedCases(changedCaseIds);
+          // Clear after 3 seconds
+          setTimeout(() => setUpdatedCases(new Set()), 3000);
+          
+          // Set recent activity flag
+          setHasRecentActivity(true);
+          setLastActivityTime(new Date());
+        }
         setCasesState(fetchedCases);
         setLastUpdated(new Date());
       }
@@ -75,6 +97,21 @@ export function CasesProvider({ children }: { children: ReactNode }) {
 
     return () => clearInterval(interval);
   }, [cases]); // Re-create interval when cases change to compare against latest
+
+  // Clear hasRecentActivity after 30 seconds
+  useEffect(() => {
+    if (!hasRecentActivity || !lastActivityTime) return;
+
+    const timeoutId = setTimeout(() => {
+      const now = new Date();
+      const elapsed = now.getTime() - lastActivityTime.getTime();
+      if (elapsed >= 30000) { // 30 seconds
+        setHasRecentActivity(false);
+      }
+    }, 30000);
+
+    return () => clearTimeout(timeoutId);
+  }, [hasRecentActivity, lastActivityTime]);
 
   const setCases = (newCases: RejectionCase[]) => {
     setCasesState(newCases);
@@ -134,6 +171,12 @@ export function CasesProvider({ children }: { children: ReactNode }) {
       setCasesState(prev =>
         prev.map(c => c.codigoSC === codigoSC ? updatedCase : c)
       );
+      
+      // Mark as recent activity
+      setHasRecentActivity(true);
+      setLastActivityTime(new Date());
+      setUpdatedCases(new Set([codigoSC]));
+      setTimeout(() => setUpdatedCases(new Set()), 3000);
     } catch (err) {
       console.error('Error adding timeline event:', err);
       setError(err instanceof Error ? err.message : 'Failed to add event');
@@ -160,6 +203,8 @@ export function CasesProvider({ children }: { children: ReactNode }) {
         error,
         lastUpdated,
         isRefreshing,
+        updatedCases,
+        hasRecentActivity,
       }}
     >
       {children}

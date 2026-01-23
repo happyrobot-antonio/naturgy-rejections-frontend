@@ -7,10 +7,9 @@ interface SlideOverProps {
   isOpen: boolean;
   onClose: () => void;
   children: React.ReactNode;
-  title?: string;
 }
 
-export default function SlideOver({ isOpen, onClose, children, title }: SlideOverProps) {
+export default function SlideOver({ isOpen, onClose, children }: SlideOverProps) {
   // Prevent body scroll when open
   useEffect(() => {
     if (isOpen) {
@@ -38,31 +37,26 @@ export default function SlideOver({ isOpen, onClose, children, title }: SlideOve
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden">
-      {/* Backdrop */}
+      {/* Backdrop - only blur, no dark overlay */}
       <div
-        className="absolute inset-0 bg-gray-900/30 backdrop-blur-sm transition-opacity duration-300"
+        className="absolute inset-0 backdrop-blur-sm transition-opacity duration-200"
         onClick={onClose}
       />
 
-      {/* Panel */}
+      {/* Panel - wider */}
       <div className="absolute inset-y-0 right-0 flex max-w-full pl-10">
-        <div className="w-screen max-w-2xl transform transition-all duration-300 ease-out">
+        <div className="w-screen max-w-3xl transform transition-all duration-200 ease-out">
           <div className="flex h-full flex-col bg-white shadow-2xl">
-            {/* Header */}
-            <div className="border-b border-gray-100 px-6 py-4">
-              <div className="flex items-center justify-between">
-                {title && (
-                  <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
-                )}
-                <button
-                  type="button"
-                  className="rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-2 transition-colors duration-200"
-                  onClick={onClose}
-                >
-                  <span className="sr-only">Cerrar</span>
-                  <X className="h-5 w-5" />
-                </button>
-              </div>
+            {/* Close button - no header title */}
+            <div className="absolute top-4 right-4 z-10">
+              <button
+                type="button"
+                className="rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 p-2 transition-colors duration-200"
+                onClick={onClose}
+              >
+                <span className="sr-only">Cerrar</span>
+                <X className="h-5 w-5" />
+              </button>
             </div>
 
             {/* Content */}

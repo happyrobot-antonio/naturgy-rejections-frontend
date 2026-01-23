@@ -1,97 +1,78 @@
 'use client';
 
 import { TimelineEvent } from '@/types/case';
-import { Mail, Phone, Paperclip, FileText, AlertCircle, Clock, Zap, HelpCircle } from 'lucide-react';
-import { formatDistanceToNow } from 'date-fns';
+import { formatDistanceToNow, format, isSameDay } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { Mail, Phone, Inbox, AlertCircle, Clock, AlertTriangle, CheckCircle } from 'lucide-react';
 
 interface TimelineProps {
   events: TimelineEvent[];
   codigoSC: string;
 }
 
-const getEventIcon = (type: string) => {
+const getEventIcon = (type: string, title?: string) => {
   switch (type) {
-    case 'happyrobot_init':
-      return Zap;
-    case 'email_not_found':
-      return AlertCircle;
-    case 'call_sent':
-      return Phone;
     case 'email_sent':
-      return Mail;
-    case 'wait_24h':
-    case 'wait_48h':
-    case 'wait_72h':
-      return Clock;
-    case 'email_received_with_attachment':
-      return Paperclip;
-    case 'email_received_no_attachment':
-      return FileText;
-    case 'needs_assistance':
-      return HelpCircle;
+      return { icon: Mail, color: 'text-blue-600', bgColor: 'bg-blue-50' };
+    case 'call':
+      return { icon: Phone, color: 'text-green-600', bgColor: 'bg-green-50' };
+    case 'incoming_email':
+      return { icon: Inbox, color: 'text-purple-600', bgColor: 'bg-purple-50' };
+    case 'missing_information':
+      return { icon: AlertCircle, color: 'text-yellow-600', bgColor: 'bg-yellow-50' };
+    case 'wait_time':
+      return { icon: Clock, color: 'text-gray-500', bgColor: 'bg-gray-50' };
+    case 'needs_review':
+      return { icon: AlertTriangle, color: 'text-red-600', bgColor: 'bg-red-50' };
+    case 'result':
+      // Check title for specific result types
+      if (title?.toLowerCase().includes('cancelada')) {
+        return { icon: CheckCircle, color: 'text-red-600', bgColor: 'bg-red-100' };
+      }
+      if (title?.toLowerCase().includes('relanzada')) {
+        return { icon: CheckCircle, color: 'text-purple-600', bgColor: 'bg-purple-100' };
+      }
+      return { icon: CheckCircle, color: 'text-emerald-600', bgColor: 'bg-emerald-50' };
     default:
-      return FileText;
+      return { icon: AlertCircle, color: 'text-gray-500', bgColor: 'bg-gray-50' };
   }
 };
 
-const getEventDotColor = (type: string) => {
-  switch (type) {
-    case 'happyrobot_init':
-      return 'bg-naturgy-orange';
-    case 'email_not_found':
-    case 'needs_assistance':
-      return 'bg-red-500';
-    case 'call_sent':
-      return 'bg-green-500';
-    case 'email_sent':
-      return 'bg-blue-500';
-    case 'wait_24h':
-    case 'wait_48h':
-    case 'wait_72h':
-      return 'bg-yellow-500';
-    case 'email_received_with_attachment':
-      return 'bg-purple-500';
-    case 'email_received_no_attachment':
-      return 'bg-indigo-500';
+const getCallStatusBadge = (callStatus?: string) => {
+  switch (callStatus) {
+    case 'Not reached':
+      return 'bg-red-50 text-red-600';
+    case 'Reached':
+      return 'bg-green-50 text-green-600';
+    case 'Needs help':
+      return 'bg-yellow-50 text-yellow-600';
     default:
-      return 'bg-gray-400';
+      return 'bg-gray-50 text-gray-600';
   }
 };
 
-const getEventLabel = (type: string) => {
-  switch (type) {
-    case 'happyrobot_init':
-      return 'Automatización iniciada';
-    case 'email_not_found':
-      return 'Email no encontrado';
-    case 'call_sent':
-      return 'Llamada enviada';
-    case 'email_sent':
-      return 'Email enviado';
-    case 'wait_24h':
-      return 'Esperar 24h';
-    case 'wait_48h':
-      return 'Esperar 48h';
-    case 'wait_72h':
-      return 'Esperar 72h';
-    case 'email_received_with_attachment':
-      return 'Email con adjunto';
-    case 'email_received_no_attachment':
-      return 'Email sin adjunto';
-    case 'needs_assistance':
-      return 'Necesita asistencia';
-    default:
-      return 'Evento';
-  }
+// Group events by day
+const groupEventsByDay = (events: TimelineEvent[]) => {
+  const grouped: { [key: string]: TimelineEvent[] } = {};
+  
+  events.forEach(event => {
+    const date = new Date(event.timestamp);
+    const dateKey = format(date, 'yyyy-MM-dd');
+    
+    if (!grouped[dateKey]) {
+      grouped[dateKey] = [];
+    }
+    grouped[dateKey].push(event);
+  });
+  
+  return grouped;
 };
 
-export default function Timeline({ events, codigoSC }: TimelineProps) {
+export default function Timeline({ events }: TimelineProps) {
   if (!events || events.length === 0) {
     return (
-      <div className="text-center py-6 text-gray-400">
-        <FileText className="w-8 h-8 mx-auto mb-2 opacity-30" />
-        <p className="text-xs">Sin eventos</p>
+      <div className="text-center py-4 text-gray-400 text-xs">
+        Sin eventos
       </div>
     );
   }
@@ -101,38 +82,84 @@ export default function Timeline({ events, codigoSC }: TimelineProps) {
     (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
   );
 
+  // Group by day
+  const groupedEvents = groupEventsByDay(sortedEvents);
+  const dayKeys = Object.keys(groupedEvents).sort((a, b) => b.localeCompare(a));
+
   return (
-    <div className="space-y-3">
-      {sortedEvents.map((event, eventIdx) => {
-        const Icon = getEventIcon(event.type);
-        const isLast = eventIdx === sortedEvents.length - 1;
-        const eventDate = new Date(event.timestamp);
-        const relativeTime = formatDistanceToNow(eventDate, { addSuffix: true, locale: es });
+    <div className="space-y-4">
+      {dayKeys.map((dayKey) => {
+        const dayEvents = groupedEvents[dayKey];
+        const dayDate = new Date(dayKey);
+        const isToday = isSameDay(dayDate, new Date());
+        const dateLabel = isToday 
+          ? 'Hoy' 
+          : format(dayDate, "d MMM", { locale: es });
 
         return (
-          <div key={event.id} className="relative">
-            {/* Vertical line */}
-            {!isLast && (
-              <div className="absolute left-2 top-5 bottom-0 w-px bg-gray-200" />
-            )}
-            
-            {/* Event content */}
-            <div className="flex items-start space-x-3">
-              {/* Icon dot */}
-              <div className="relative flex-shrink-0 mt-0.5">
-                <div className={`h-4 w-4 rounded-full ${getEventDotColor(event.type)} flex items-center justify-center`}>
-                  <Icon className="h-2.5 w-2.5 text-white" strokeWidth={2.5} />
-                </div>
-              </div>
-              
-              {/* Event info */}
-              <div className="flex-1 min-w-0 pb-3">
-                <p className="text-sm font-medium text-gray-900">{getEventLabel(event.type)}</p>
-                {event.description && (
-                  <p className="text-xs text-gray-600 mt-0.5 line-clamp-2">{event.description}</p>
-                )}
-                <p className="text-xs text-gray-400 mt-1">{relativeTime}</p>
-              </div>
+          <div key={dayKey}>
+            {/* Day Header - Compact */}
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
+                {dateLabel}
+              </span>
+              <div className="h-px bg-gray-100 flex-1" />
+            </div>
+
+            {/* Events for this day - Compact */}
+            <div className="space-y-1">
+              {dayEvents.map((event, eventIdx) => {
+                const isLast = eventIdx === dayEvents.length - 1 && dayKey === dayKeys[dayKeys.length - 1];
+                const eventDate = new Date(event.timestamp);
+                const relativeTime = formatDistanceToNow(eventDate, { addSuffix: true, locale: es });
+                const iconConfig = getEventIcon(event.type, event.title);
+                const Icon = iconConfig.icon;
+
+                return (
+                  <div key={event.id} className="relative flex items-start gap-2 py-1.5">
+                    {/* Vertical line */}
+                    {!isLast && (
+                      <div className="absolute left-[11px] top-7 bottom-0 w-px bg-gray-100" />
+                    )}
+                    
+                    {/* Icon - Smaller */}
+                    <div className={`flex-shrink-0 h-6 w-6 rounded-full ${iconConfig.bgColor} flex items-center justify-center`}>
+                      <Icon className={`h-3 w-3 ${iconConfig.color}`} />
+                    </div>
+                    
+                    {/* Event content - Compact */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-baseline justify-between gap-2">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span className={`text-sm font-medium truncate ${
+                            event.type === 'result' 
+                              ? iconConfig.color 
+                              : 'text-gray-900'
+                          }`}>
+                            {event.title}
+                          </span>
+                          {/* Call status badge */}
+                          {event.type === 'call' && event.metadata?.callStatus && (
+                            <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${getCallStatusBadge(event.metadata.callStatus)}`}>
+                              {event.metadata.callStatus}
+                            </span>
+                          )}
+                        </div>
+                        <span className="text-[10px] text-gray-400 flex-shrink-0">
+                          {format(eventDate, 'HH:mm')}
+                        </span>
+                      </div>
+                      
+                      {/* Description - Smaller */}
+                      {event.description && (
+                        <p className="text-xs text-gray-500 mt-0.5 line-clamp-2">
+                          {event.description}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         );

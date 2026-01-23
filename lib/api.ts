@@ -35,9 +35,13 @@ export interface RejectionCase {
 export interface TimelineEvent {
   id: string;
   caseId: string;
-  type: 'happyrobot_init' | 'email_not_found' | 'call_sent' | 'email_sent' | 'wait_24h' | 'wait_48h' | 'wait_72h' | 'email_received_with_attachment' | 'email_received_no_attachment' | 'needs_assistance';
+  type: 'email_sent' | 'call' | 'incoming_email' | 'missing_information' | 'wait_time' | 'needs_review' | 'result';
+  title: string;
   description: string;
-  metadata?: any;
+  metadata?: {
+    callStatus?: 'Not reached' | 'Reached' | 'Needs help';
+    [key: string]: any;
+  };
   timestamp: string;
 }
 
@@ -66,9 +70,13 @@ export interface CreateCaseInput {
 }
 
 export interface CreateEventInput {
-  type: 'happyrobot_init' | 'email_not_found' | 'call_sent' | 'email_sent' | 'wait_24h' | 'wait_48h' | 'wait_72h' | 'email_received_with_attachment' | 'email_received_no_attachment' | 'needs_assistance';
+  type: 'email_sent' | 'call' | 'incoming_email' | 'missing_information' | 'wait_time' | 'needs_review' | 'result';
+  title: string;
   description: string;
-  metadata?: Record<string, any>;
+  metadata?: {
+    callStatus?: 'Not reached' | 'Reached' | 'Needs help';
+    [key: string]: any;
+  };
 }
 
 export interface CasesStats {
@@ -166,5 +174,75 @@ export const eventsApi = {
       method: 'POST',
     });
     if (!response.ok) throw new Error('Failed to delete event');
+  },
+};
+
+// Analytics API Types
+export interface AnalyticsOverview {
+  automation: {
+    hoursSaved: number;
+    automationRate: number;
+    casesProcessed: number;
+    costSavings: number;
+  };
+  communication: {
+    totalEmails: { sent: number; received: number };
+    totalCalls: { total: number; reached: number; notReached: number; needsHelp: number };
+    avgResponseTime: number;
+    callSuccessRate: number;
+  };
+  cases: {
+    total: number;
+    resolved: number;
+    resolutionRate: number;
+    avgResolutionTime: number;
+    byStatus: Array<{ status: string; count: number }>;
+  };
+  efficiency: {
+    eventsPerCase: number;
+    retryRate: number;
+    reviewRate: number;
+    avgWaitTime: number;
+  };
+}
+
+export interface TrendData {
+  date: string;
+  cases: number;
+}
+
+export interface DistributionData {
+  eventTypes: Array<{ type: string; count: number }>;
+  geographic: Array<{ region: string; count: number }>;
+  processTypes: Array<{ process: string; count: number }>;
+  distributors: Array<{ distributor: string; count: number }>;
+}
+
+// Analytics API
+export const analyticsApi = {
+  async getOverview(startDate?: string, endDate?: string): Promise<AnalyticsOverview> {
+    const params = new URLSearchParams();
+    if (startDate) params.append('startDate', startDate);
+    if (endDate) params.append('endDate', endDate);
+    
+    const url = params.toString()
+      ? `${API_BASE_URL}/analytics/overview?${params}`
+      : `${API_BASE_URL}/analytics/overview`;
+    
+    const response = await fetch(url);
+    if (!response.ok) throw new Error('Failed to fetch analytics overview');
+    return response.json();
+  },
+
+  async getTrends(period: '7d' | '30d' | '90d'): Promise<TrendData[]> {
+    const response = await fetch(`${API_BASE_URL}/analytics/trends?period=${period}`);
+    if (!response.ok) throw new Error('Failed to fetch trends');
+    return response.json();
+  },
+
+  async getDistribution(): Promise<DistributionData> {
+    const response = await fetch(`${API_BASE_URL}/analytics/distribution`);
+    if (!response.ok) throw new Error('Failed to fetch distribution');
+    return response.json();
   },
 };
