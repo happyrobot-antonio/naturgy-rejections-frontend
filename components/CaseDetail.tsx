@@ -9,7 +9,6 @@ import {
   Phone,
   Mail,
   FileText,
-  Zap,
   ExternalLink,
   ChevronDown,
   ChevronUp,
@@ -104,31 +103,29 @@ export default function CaseDetail({ caseItem }: CaseDetailProps) {
   return (
     <div className="flex flex-col h-full relative overflow-y-auto">
       {/* HEADER - Rich Information */}
-      <div className="px-6 py-3 border-b border-gray-100 bg-gray-50 flex-shrink-0">
+      <div className="px-6 py-3 pr-14 border-b border-gray-100 bg-gray-50 flex-shrink-0">
         {/* Row 1: Name + Status Badge */}
         <div className="flex items-center justify-between mb-2">
           <h2 className="text-lg font-bold text-gray-900">{caseItem.nombreApellidos}</h2>
-          <div className="flex items-center gap-2">
-            {/* HappyRobot Link */}
-            {caseItem.happyrobotUrl && (
-              <a
-                href={caseItem.happyrobotUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-1 px-2 py-1 text-xs font-medium text-naturgy-orange hover:bg-orange-50 rounded transition-colors"
-                title="Ver en HappyRobot"
-              >
-                <Zap className="w-3 h-3" />
-                <span>HR</span>
-                <ExternalLink className="w-3 h-3" />
-              </a>
-            )}
-            {/* Status Badge */}
-            <span className={`px-3 py-1 rounded-full text-xs font-semibold ${statusConfig.bg} ${statusConfig.text}`}>
-              {statusConfig.label}
-            </span>
-          </div>
+          {/* Status Badge */}
+          <span className={`px-3 py-1 rounded-full text-xs font-semibold ${statusConfig.bg} ${statusConfig.text}`}>
+            {statusConfig.label}
+          </span>
         </div>
+
+        {/* HappyRobot Link - Prominent */}
+        {caseItem.happyrobotUrl && (
+          <a
+            href={caseItem.happyrobotUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 px-4 py-2 mb-3 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-black transition-colors"
+          >
+            <img src="/happyrobot-icon-white.png" alt="" className="w-4 h-4" />
+            <span>Ver en HappyRobot</span>
+            <ExternalLink className="w-3 h-3" />
+          </a>
+        )}
 
         {/* Row 2: Contact Info */}
         <div className="flex items-center gap-4 text-sm text-gray-600 mb-2">
