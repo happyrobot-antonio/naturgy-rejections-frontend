@@ -2,13 +2,15 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { Upload, RefreshCw } from 'lucide-react';
+import { Upload, RefreshCw, RotateCcw, AlertTriangle } from 'lucide-react';
 import Modal from './Modal';
 import ExcelUpload from './ExcelUpload';
 import ViewSwitcher from './ViewSwitcher';
 import { useCases } from '@/lib/CasesContext';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
 
 interface HeaderProps {
   currentView: 'monitor' | 'analyze';
@@ -17,13 +19,34 @@ interface HeaderProps {
 
 export default function Header({ currentView, onViewChange }: HeaderProps) {
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [isResetModalOpen, setIsResetModalOpen] = useState(false);
   const [isManualRefreshing, setIsManualRefreshing] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
   const { lastUpdated, isRefreshing, hasRecentActivity, refreshCases } = useCases();
 
   const handleManualRefresh = async () => {
     setIsManualRefreshing(true);
     await refreshCases();
     setTimeout(() => setIsManualRefreshing(false), 1000);
+  };
+
+  const handleResetDatabase = async () => {
+    setIsResetting(true);
+    try {
+      const response = await fetch(`${API_BASE_URL}/admin/reset-db`, {
+        method: 'POST',
+      });
+      if (response.ok) {
+        await refreshCases();
+        setIsResetModalOpen(false);
+      } else {
+        alert('Error al reiniciar la base de datos');
+      }
+    } catch (error) {
+      alert('Error de conexión');
+    } finally {
+      setIsResetting(false);
+    }
   };
 
   const getTimeSinceUpdate = () => {
@@ -86,6 +109,15 @@ export default function Header({ currentView, onViewChange }: HeaderProps) {
 
           {/* Right Section - Action Buttons */}
           <div className="flex justify-end items-center gap-3">
+            {/* Reset DB Button */}
+            <button
+              onClick={() => setIsResetModalOpen(true)}
+              className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-200"
+              title="Reiniciar base de datos"
+            >
+              <RotateCcw className="w-4 h-4" />
+            </button>
+
             {/* Refresh Button */}
             <button
               onClick={handleManualRefresh}
@@ -108,8 +140,47 @@ export default function Header({ currentView, onViewChange }: HeaderProps) {
         </div>
       </header>
 
+      {/* Upload Modal */}
       <Modal isOpen={isUploadModalOpen} onClose={() => setIsUploadModalOpen(false)}>
         <ExcelUpload onClose={() => setIsUploadModalOpen(false)} />
+      </Modal>
+
+      {/* Reset DB Confirmation Modal */}
+      <Modal isOpen={isResetModalOpen} onClose={() => setIsResetModalOpen(false)}>
+        <div className="p-6 text-center">
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <AlertTriangle className="w-8 h-8 text-red-600" />
+          </div>
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">
+            Reiniciar Base de Datos
+          </h3>
+          <p className="text-gray-500 mb-6">
+            Esta acción eliminará <strong>todos los casos y eventos</strong> de la base de datos. 
+            Esta acción no se puede deshacer.
+          </p>
+          <div className="flex gap-3 justify-center">
+            <button
+              onClick={() => setIsResetModalOpen(false)}
+              className="px-5 py-2.5 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg font-medium transition-colors"
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={handleResetDatabase}
+              disabled={isResetting}
+              className="px-5 py-2.5 bg-red-600 text-white hover:bg-red-700 rounded-lg font-medium transition-colors disabled:opacity-50 flex items-center gap-2"
+            >
+              {isResetting ? (
+                <>
+                  <RotateCcw className="w-4 h-4 animate-spin" />
+                  Reiniciando...
+                </>
+              ) : (
+                'Sí, reiniciar'
+              )}
+            </button>
+          </div>
+        </div>
       </Modal>
     </>
   );
