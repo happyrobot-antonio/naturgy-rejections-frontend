@@ -80,21 +80,22 @@ export default function LoginScreen({ onSuccess }: LoginScreenProps) {
       `}</style>
 
       <div className="login-suisse min-h-screen bg-white flex">
-        {/* Left Panel - Hero Image */}
-        <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
-          {/* Background Image */}
-          <Image
-            src="/background-utilities.png"
-            alt="Naturgy Infrastructure"
-            fill
-            className="object-cover"
-            priority
+        {/* Left Panel - Black Background */}
+        <div className="hidden lg:flex lg:w-1/2 bg-black relative overflow-hidden">
+          {/* Subtle grid pattern */}
+          <div 
+            className="absolute inset-0 opacity-[0.04]"
+            style={{
+              backgroundImage: `linear-gradient(rgba(255,255,255,.1) 1px, transparent 1px),
+                                linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px)`,
+              backgroundSize: '60px 60px'
+            }}
           />
           
-          {/* Gradient Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-black/20" />
+          {/* Orange accent line */}
+          <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-naturgy-orange via-orange-500/50 to-transparent" />
           
-          {/* Content over image */}
+          {/* Content */}
           <div className="relative z-10 flex flex-col justify-between p-10 w-full">
             {/* Logo */}
             <div>
@@ -103,30 +104,30 @@ export default function LoginScreen({ onSuccess }: LoginScreenProps) {
                 alt="Naturgy"
                 width={140}
                 height={48}
-                className="h-9 w-auto brightness-0 invert drop-shadow-lg"
+                className="h-9 w-auto brightness-0 invert"
               />
             </div>
             
             {/* Center content */}
             <div className="space-y-4">
-              <h1 className="login-tobias text-5xl text-white tracking-tight leading-tight drop-shadow-lg">
+              <h1 className="login-tobias text-5xl text-white tracking-tight leading-tight">
                 Gestión de<br />
                 <span className="text-naturgy-orange">Rechazos</span>
               </h1>
-              <p className="text-white/80 text-sm max-w-sm leading-relaxed">
+              <p className="text-white/60 text-sm max-w-sm leading-relaxed">
                 Monitorización y análisis de casos de rechazo en tiempo real
               </p>
             </div>
             
             {/* Footer */}
             <div className="flex items-center gap-3">
-              <span className="text-white/50 text-xs uppercase tracking-widest">Powered by</span>
+              <span className="text-white/40 text-xs uppercase tracking-widest">Powered by</span>
               <Image
                 src="/happyrobot-logo.svg"
                 alt="HappyRobot"
                 width={90}
                 height={18}
-                className="h-3.5 w-auto brightness-0 invert opacity-70"
+                className="h-3.5 w-auto brightness-0 invert opacity-60"
               />
             </div>
           </div>
